@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use SolidPhp\ValueObjects\Enum\EnumInterface;
 use SolidPhp\ValueObjects\Enum\EnumTrait;
 
-class EnumTest extends TestCase
+class EnumTraitTest extends TestCase
 {
     public function testInstances(): void
     {
