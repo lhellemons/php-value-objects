@@ -32,7 +32,7 @@ instance properties are defined!
 
 Example:
 ```
-class FromValuesType implements ValueObjectInterface
+class MyValueType implements ValueObjectInterface
 {
     use ValueObjectTrait;
 
@@ -57,6 +57,16 @@ class FromValuesType implements ValueObjectInterface
         return $this->bar;
     }
 }
+
+$myValueObject = MyValueType::fromFooAndBar('foo', 1);
+$myValueObject->getFoo() === 'foo';
+$myValueObject->getBar() === 1;
+
+$mySameValueObject = MyValueType::fromFooAndBar('foo', 1);
+$myValueObject === $mySameValueObject; // true
+
+$myOtherValueObject = MyValueType::fromFooAndBar('foo', 2);
+$myValueObject === $myOtherValueObject; // false
 
 ```
 
