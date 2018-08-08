@@ -1,5 +1,6 @@
 {
   "name": "solidphp/value-objects",
+  "version": "0.1",
   "description": "Utility classes, traits and interfaces for implementing true PHP value objects",
   "type": "library",
   "license": "MIT",
