@@ -9,31 +9,37 @@ trait ValueObjectTrait /* implements ValueObjectInterface */
 
     private static $instances;
 
-    final private function __construct(...$values)
+    final private function __construct(array $valueArray)
     {
         self::ensureInstancePropertiesAnalyzed();
 
-        if (($parameterCount = \count($values)) !== ($instancePropertyCount = \count(static::$instanceProperties))) {
-            throw new \DomainException(
+        if ($missingPropValues = array_diff(self::$instanceProperties, array_keys($valueArray))) {
+            throw new \RuntimeException(
                 sprintf(
-                    'Unable to instantiate value object of type %s; %d parameters expected, %d given',
+                    'Value type %s instantiation missing property value%s for %s',
                     static::class,
-                    $instancePropertyCount,
-                    $parameterCount
-                )
+                    count($missingPropValues) > 1 ? 's': '',
+                    implode(', ', $missingPropValues))
             );
         }
 
-        foreach (array_combine(self::$instanceProperties, $values) as $property => $value) {
-            $this->$property = $value;
+        foreach (static::$instanceProperties as $property) {
+            $this->$property = $valueArray[$property];
         }
     }
 
     final protected static function fromValues(...$values): self
     {
-        $key = get_value_object_instance_key($values);
+        static::ensureInstancePropertiesAnalyzed();
+
+        return static::fromPropertyValues(array_combine(self::$instanceProperties, $values));
+    }
+
+    final protected static function fromPropertyValues(array $propertyValues): self
+    {
+        $key = get_value_object_instance_key($propertyValues);
         if (!isset(static::$instances[$key])) {
-            static::$instances[$key] = new static(...$values);
+            static::$instances[$key] = new static($propertyValues);
         }
 
         return static::$instances[$key];
@@ -57,14 +63,14 @@ trait ValueObjectTrait /* implements ValueObjectInterface */
                 static::$instanceProperties
             )
         );
-    }
+}
 
-    private static function ensureInstancePropertiesAnalyzed(): void
-    {
-        if (static::$instanceProperties === null) {
-            static::$instanceProperties = analyze_instance_properties(static::class);
-        }
+private static function ensureInstancePropertiesAnalyzed(): void
+{
+    if (static::$instanceProperties === null) {
+        static::$instanceProperties = analyze_instance_properties(static::class);
     }
+}
 }
 
 function analyze_instance_properties(string $valueObjectClass): array
@@ -90,10 +96,11 @@ function analyze_instance_properties(string $valueObjectClass): array
 
 function is_value_object_instance_property(\ReflectionProperty $property): bool
 {
-    return !$property->isStatic() && $property->isPrivate();
+    return !$property->isStatic() && !$property->isPublic();
 }
 
 function get_value_object_instance_key(array $values): string
 {
+    ksort($values);
     return json_encode($values);
 }
