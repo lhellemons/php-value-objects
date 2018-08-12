@@ -6,17 +6,17 @@
  * Time: 16:32
  */
 
-namespace SolidPhp\Type;
+namespace SolidPhp\ValueObjects\Type;
 
 use RuntimeException;
 
 final class TraitType extends Type
 {
-    public static function fromString(string $fqtn): self
+    public static function fromClassString(string $classString): self
     {
-        if (!trait_exists($fqtn)) {
-            throw new RuntimeException(sprintf('Type "%s" does not exist or is not a trait', $fqtn));
+        if (!trait_exists($classString)) {
+            throw new RuntimeException(sprintf('Type "%s" does not exist or is not a trait', $classString));
         }
-        return static::fromValues($fqtn, TypeType::TRAIT());
+        return static::fromValues($classString, Kind::TRAIT());
     }
 }

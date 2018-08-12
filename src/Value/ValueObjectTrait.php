@@ -5,9 +5,9 @@ namespace SolidPhp\ValueObjects\Value;
 
 trait ValueObjectTrait /* implements ValueObjectInterface */
 {
-    private static $instanceProperties;
+    protected static $instanceProperties;
 
-    private static $instances;
+    protected static $instances;
 
     final private function __construct(array $valueArray)
     {

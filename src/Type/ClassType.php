@@ -6,17 +6,17 @@
  * Time: 16:32
  */
 
-namespace SolidPhp\Type;
+namespace SolidPhp\ValueObjects\Type;
 
 use RuntimeException;
 
 final class ClassType extends Type
 {
-    public static function fromString(string $fqcn): self
+    public static function fromClassString(string $classString): self
     {
-        if (!class_exists($fqcn)) {
-            throw new RuntimeException(sprintf('Type "%s" does not exist or is not a class', $fqcn));
+        if (!class_exists($classString)) {
+            throw new RuntimeException(sprintf('Type "%s" does not exist or is not a class', $classString));
         }
-        return static::fromValues($fqcn, TypeType::CLASS());
+        return static::fromValues($classString, Kind::CLASS());
     }
 }

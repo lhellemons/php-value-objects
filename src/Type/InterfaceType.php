@@ -6,17 +6,17 @@
  * Time: 16:32
  */
 
-namespace SolidPhp\Type;
+namespace SolidPhp\ValueObjects\Type;
 
 use RuntimeException;
 
 final class InterfaceType extends Type
 {
-    public static function fromString(string $fqin): self
+    public static function fromClassString(string $classString): self
     {
-        if (!interface_exists($fqin)) {
-            throw new RuntimeException(sprintf('Type "%s" does not exist or is not an interface', $fqin));
+        if (!interface_exists($classString)) {
+            throw new RuntimeException(sprintf('Type "%s" does not exist or is not an interface', $classString));
         }
-        return static::fromValues($fqin, TypeType::INTERFACE());
+        return static::fromValues($classString, Kind::INTERFACE());
     }
 }

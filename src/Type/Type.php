@@ -1,6 +1,6 @@
 <?php
 
-namespace SolidPhp\Type;
+namespace SolidPhp\ValueObjects\Type;
 
 use SolidPhp\ValueObjects\Value\ValueObjectInterface;
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
@@ -12,27 +12,41 @@ abstract class Type implements ValueObjectInterface
     /** @var string */
     protected $name;
 
-    /** @var TypeType */
-    protected $type;
+    /** @var Kind */
+    protected $kind;
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return TypeType
-     */
-    public function getType(): TypeType
+    public function getKind(): Kind
     {
-        return $this->type;
+        return $this->kind;
     }
 
     final public function __toString(): string
     {
-        return sprintf('%s %s', $this->type->getId(), $this->getName());
+        return sprintf('%s %s', $this->kind->getId(), $this->getName());
+    }
+
+    final public function isSuperTypeOf(Type $type): bool
+    {
+        return is_subclass_of($type->getName(), $this->getName(),true);
+    }
+
+    final public function isSubTypeOf(Type $type): bool
+    {
+        return $type->isSuperTypeOf($this);
+    }
+
+    final public function envelops(Type $type): bool
+    {
+        return $this === $type || $this->isSuperTypeOf($type);
+    }
+
+    final public function fits(Type $type): bool
+    {
+        return $type->envelops($this);
     }
 }

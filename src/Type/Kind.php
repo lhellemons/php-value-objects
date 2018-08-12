@@ -6,12 +6,12 @@
  * Time: 16:31
  */
 
-namespace SolidPhp\Type;
+namespace SolidPhp\ValueObjects\Type;
 
 use SolidPhp\ValueObjects\Enum\EnumInterface;
 use SolidPhp\ValueObjects\Enum\EnumTrait;
 
-final class TypeType implements EnumInterface
+final class Kind implements EnumInterface
 {
     use EnumTrait;
 
