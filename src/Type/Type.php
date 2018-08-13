@@ -32,7 +32,7 @@ abstract class Type implements ValueObjectInterface
 
     final public function isSuperTypeOf(Type $type): bool
     {
-        return is_subclass_of($type->getName(), $this->getName(),true);
+        return $type === $this || is_subclass_of($type->getName(), $this->getName(),true);
     }
 
     final public function isSubTypeOf(Type $type): bool
@@ -40,13 +40,8 @@ abstract class Type implements ValueObjectInterface
         return $type->isSuperTypeOf($this);
     }
 
-    final public function envelops(Type $type): bool
+    final public function isInstance(object $object): bool
     {
-        return $this === $type || $this->isSuperTypeOf($type);
-    }
-
-    final public function fits(Type $type): bool
-    {
-        return $type->envelops($this);
+        return $this->isSuperTypeOf(ClassType::fromClassString(get_class($object)));
     }
 }
