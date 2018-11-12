@@ -1,21 +1,15 @@
-SolidPHP Value Objects library
-==============================
-
-Author: Laurens Hellemons <lhellemons@gmail.com>
-
-This library contains utility classes, traits and interfaces for working with value objects in PHP.
-By using these, you can easily define your own value objects.
-
-Read the full documentation [here](docs/index.md).
-
 Usage
 -----
+
+First, add the package to your composer dependencies
 
 ```
 composer require lhellemons/php-value-objects
 ```
 
 Then, use the classes or traits in your own designs.
+
+### Enums
 
 ```php
 <?php
@@ -32,6 +26,10 @@ final class MyEnum
     }
 }
 ```
+
+Check out the specific documentation for Enums here: [Enums documentation](enums.md)
+
+### Value objects
 
 ```php
 
@@ -60,3 +58,5 @@ final class MyValueObject
     }
 }
 ```
+
+Check out the specific documentation for value objects here: [Value objects documentation](value-objects.md)
