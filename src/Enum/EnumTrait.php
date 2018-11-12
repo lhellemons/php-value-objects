@@ -82,6 +82,8 @@ trait EnumTrait /* implements EnumInterface */
     /**
      * Constructs a new instance of this Enum class.
      * This method is made private to enforce the use of factory methods
+     * @param string $id
+     * @param array $initializationData
      */
     private function __construct(string $id, ...$initializationData)
     {
@@ -171,5 +173,6 @@ function is_enum_factory_method(\ReflectionMethod $method): bool
     return $method->isPublic()
         && $method->isStatic()
         && $method->getNumberOfParameters() === 0
-        && ($returnType = $method->getReturnType()) && $returnType->getName() === 'self';
+        && ($returnType = $method->getReturnType())
+        && \in_array($returnType->getName(),['self', $method->getDeclaringClass()->getName()], true);
 }

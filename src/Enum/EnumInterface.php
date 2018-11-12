@@ -5,7 +5,7 @@ namespace SolidPhp\ValueObjects\Enum;
 
 /**
  * Interface EnumInterface
- * @package SolidPhp\ValueObjects\Value
+ * @package SolidPhp\ValueObjects\Enum
  *
  * This interface specifies that the implementing class can be used as an enumeration (Enum).
  * Enums define a fixed set of instances that are instantiated by factory methods. The implementing
@@ -23,7 +23,7 @@ interface EnumInterface
      * @param string $id The id of the instance to retrieve
      * @param bool $throwIfNotFound If true, and there is no instance for the given $id, a DomainException will be
      * thrown. If false (default), null will be returned
-     * @return $this
+     * @return $this|null
      * @throws \DomainException if $throwIfNotFound is true and there is no instance for the given $id
      */
     public static function instance(string $id, bool $throwIfNotFound = false);
