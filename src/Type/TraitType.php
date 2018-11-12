@@ -17,6 +17,6 @@ final class TraitType extends Type
         if (!trait_exists($classString)) {
             throw new RuntimeException(sprintf('Type "%s" does not exist or is not a trait', $classString));
         }
-        return static::fromValues($classString, Kind::TRAIT());
+        return static::getInstance($classString, Kind::TRAIT());
     }
 }

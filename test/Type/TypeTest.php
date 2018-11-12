@@ -27,7 +27,7 @@ class TypeTest extends TestCase
         $type = null;
         switch ($kind) {
             case Kind::INTERFACE():
-                $type =InterfaceType::fromClassString($classString);
+                $type = InterfaceType::fromClassString($classString);
                 break;
             case Kind::TRAIT():
                 $type = TraitType::fromClassString($classString);
@@ -44,9 +44,9 @@ class TypeTest extends TestCase
     public function getCasesForExistingType(): array
     {
         return [
-            'ExistingClass' => [ExistingClass::class, Kind::CLASS()],
+            'ExistingClass'     => [ExistingClass::class, Kind::CLASS()],
             'ExistingInterface' => [ExistingInterface::class, Kind::INTERFACE()],
-            'ExistingTrait' => [ExistingTrait::class, Kind::TRAIT()],
+            'ExistingTrait'     => [ExistingTrait::class, Kind::TRAIT()],
         ];
     }
 
@@ -76,20 +76,44 @@ class TypeTest extends TestCase
     public function getCasesForNonExistingType(): array
     {
         return [
-            'non-existing class' => ['NonExistingClass', Kind::CLASS()],
+            'non-existing class'     => ['NonExistingClass', Kind::CLASS()],
             'non-existing interface' => ['NonExistingInterface', Kind::INTERFACE()],
-            'non-existing trait' => ['NonExistingTrait', Kind::TRAIT()],
-            'class as interface' => [ExistingClass::class, Kind::INTERFACE()],
-            'class as trait' => [ExistingClass::class, Kind::TRAIT()],
-            'interface as class' => [ExistingInterface::class, Kind::CLASS()],
-            'interface as trait' => [ExistingInterface::class, Kind::TRAIT()],
-            'trait as interface' => [ExistingTrait::class, Kind::INTERFACE()],
-            'trait as class' => [ExistingTrait::class, Kind::CLASS()],
+            'non-existing trait'     => ['NonExistingTrait', Kind::TRAIT()],
+            'class as interface'     => [ExistingClass::class, Kind::INTERFACE()],
+            'class as trait'         => [ExistingClass::class, Kind::TRAIT()],
+            'interface as class'     => [ExistingInterface::class, Kind::CLASS()],
+            'interface as trait'     => [ExistingInterface::class, Kind::TRAIT()],
+            'trait as interface'     => [ExistingTrait::class, Kind::INTERFACE()],
+            'trait as class'         => [ExistingTrait::class, Kind::CLASS()],
         ];
+    }
+
+    public function testIdentity(): void
+    {
+        $this->assertSame(
+            ClassType::fromClassString(ExistingClass::class),
+            ClassType::fromClassString(ExistingClass::class)
+        );
+        $this->assertSame(
+            InterfaceType::fromClassString(ExistingInterface::class),
+            InterfaceType::fromClassString(ExistingInterface::class)
+        );
+        $this->assertSame(
+            TraitType::fromClassString(ExistingTrait::class),
+            TraitType::fromClassString(ExistingTrait::class)
+        );
     }
 }
 
 
-interface ExistingInterface {}
-trait ExistingTrait {}
-class ExistingClass implements ExistingInterface {}
+interface ExistingInterface
+{
+}
+
+trait ExistingTrait
+{
+}
+
+class ExistingClass implements ExistingInterface
+{
+}

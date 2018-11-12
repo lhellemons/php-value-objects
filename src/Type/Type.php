@@ -2,10 +2,9 @@
 
 namespace SolidPhp\ValueObjects\Type;
 
-use SolidPhp\ValueObjects\Value\ValueObjectInterface;
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
 
-abstract class Type implements ValueObjectInterface
+abstract class Type
 {
     use ValueObjectTrait;
 
@@ -14,6 +13,12 @@ abstract class Type implements ValueObjectInterface
 
     /** @var Kind */
     protected $kind;
+
+    private function __construct(string $name, Kind $kind)
+    {
+        $this->name = $name;
+        $this->kind = $kind;
+    }
 
     public function getName(): string
     {
@@ -42,6 +47,6 @@ abstract class Type implements ValueObjectInterface
 
     final public function isInstance(object $object): bool
     {
-        return $this->isSuperTypeOf(ClassType::fromClassString(get_class($object)));
+        return $this->isSuperTypeOf(ClassType::fromClassString(\get_class($object)));
     }
 }

@@ -14,9 +14,9 @@ final class InterfaceType extends Type
 {
     public static function fromClassString(string $classString): self
     {
-        if (!interface_exists($classString)) {
+        if (!\interface_exists($classString)) {
             throw new RuntimeException(sprintf('Type "%s" does not exist or is not an interface', $classString));
         }
-        return static::fromValues($classString, Kind::INTERFACE());
+        return static::getInstance($classString, Kind::INTERFACE());
     }
 }
