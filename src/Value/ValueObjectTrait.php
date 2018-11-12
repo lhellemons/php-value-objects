@@ -3,104 +3,66 @@
 
 namespace SolidPhp\ValueObjects\Value;
 
-trait ValueObjectTrait /* implements ValueObjectInterface */
+/**
+ * Trait ValueObjectTrait
+ *
+ * This trait gives the using class the ability to function as a value object
+ * that can be compared by-reference.
+ *
+ * Classes using this Trait should do the following:
+ * - Define a private (or protected, if subclasses should be supported) constructor method. This method
+ *   can accept any parameters, just like a regular constructor.
+ * - Define one or more static factory methods. These factory methods can call self::getInstance to obtain
+ *   the correct instance.
+ *   <b>Important</b>: The call to getInstance must provide the arguments defined in the
+ *   constructor, in the same order. Treat it as if you were calling the constructor directly.
+ */
+trait ValueObjectTrait
 {
-    protected static $instanceProperties;
+    /** @var self[] */
+    static private $instances = [];
 
-    protected static $instances;
-
-    final private function __construct(array $valueArray)
+    protected function __construct(...$values)
     {
-        self::ensureInstancePropertiesAnalyzed();
-
-        if ($missingPropValues = array_diff(self::$instanceProperties, array_keys($valueArray))) {
-            throw new \RuntimeException(
-                sprintf(
-                    'Value type %s instantiation missing property value%s for %s',
-                    static::class,
-                    count($missingPropValues) > 1 ? 's': '',
-                    implode(', ', $missingPropValues))
-            );
-        }
-
-        foreach (static::$instanceProperties as $property) {
-            $this->$property = $valueArray[$property];
-        }
+        throw new \LogicException(sprintf('Class %s uses ValueObjectTrait but does not define a private or protected constructor.', static::class));
     }
 
-    final protected static function fromValues(...$values): self
+    final protected static function getInstance(...$values): self
     {
-        static::ensureInstancePropertiesAnalyzed();
+        $key = calculateKey(static::class, ...$values);
 
-        return static::fromPropertyValues(array_combine(self::$instanceProperties, $values));
-    }
-
-    final protected static function fromPropertyValues(array $propertyValues): self
-    {
-        $key = get_value_object_instance_key($propertyValues);
-        if (!isset(static::$instances[$key])) {
-            static::$instances[$key] = new static($propertyValues);
-        }
-
-        return static::$instances[$key];
-    }
-
-    public function equals(ValueObjectInterface $object): bool
-    {
-        return $object === $this;
-    }
-
-    final protected function getValues(): array
-    {
-        static::ensureInstancePropertiesAnalyzed();
-
-        return array_combine(
-            static::$instanceProperties,
-            array_map(
-                function (string $instanceProperty) {
-                    return $this->{$instanceProperty};
-                },
-                static::$instanceProperties
-            )
-        );
-}
-
-private static function ensureInstancePropertiesAnalyzed(): void
-{
-    if (static::$instanceProperties === null) {
-        static::$instanceProperties = analyze_instance_properties(static::class);
-    }
-}
-}
-
-function analyze_instance_properties(string $valueObjectClass): array
-{
-    try {
-        $reflectionClass = new \ReflectionClass($valueObjectClass);
-
-        return array_map(
-            function (\ReflectionProperty $instanceProperty) {
-                return $instanceProperty->getName();
-            },
-            array_filter(
-                $reflectionClass->getProperties(),
-                'SolidPhp\ValueObjects\Value\is_value_object_instance_property'
-            )
-        );
-    } catch (\ReflectionException $e) {
-        throw new \DomainException(
-            sprintf('Unable to analyze instance properties for value object type %s', $valueObjectClass), 0, $e
-        );
+        return self::$instances[$key] = self::$instances[$key] ?? new static(...$values);
     }
 }
 
-function is_value_object_instance_property(\ReflectionProperty $property): bool
-{
-    return !$property->isStatic() && !$property->isPublic();
-}
 
-function get_value_object_instance_key(array $values): string
+function calculateKey(...$values): string
 {
-    ksort($values);
-    return json_encode($values);
+    if (\count($values) === 0) {
+        return '()';
+    }
+
+    if (\count($values) > 1) {
+        return implode('|', array_map('SolidPhp\ValueObjects\Value\calculateKey',$values));
+    }
+
+    [$value] = $values;
+
+    if ($value instanceof \stdClass || \is_array($value)) {
+        return 'array:' . http_build_query(array_map('SolidPhp\ValueObjects\Value\calculateKey', (array)$value));
+    }
+
+    if (\is_object($value)) {
+        return 'object:' . spl_object_hash($value);
+    }
+
+    if (null === $value) {
+        return 'null';
+    }
+
+    if (\is_resource($value)) {
+        throw new \InvalidArgumentException('Value object cannot be constructed based on a resource');
+    }
+
+    return sprintf('scalar<%s>:%s', \gettype($value), $value);
 }

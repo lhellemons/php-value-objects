@@ -2,7 +2,6 @@
 
 namespace Test\SolidPhp\ValueObjects\Value;
 
-use SolidPhp\ValueObjects\Value\ValueObjectInterface;
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -38,9 +37,30 @@ class ValueObjectTraitTest extends TestCase
         $this->assertEquals('b',$b1->getFoo());
         $this->assertEquals('1',$b1->getBar());
     }
+
+    public function testInheritance(): void
+    {
+        $subclassA1 = SubclassAType::fromFoo('1');
+        $subclassB11 = SubclassBType::fromFooAndBar('1', 1);
+        $subclassC11 = SubclassCType::fromFooAndBar('1',1);
+
+        $this->assertSame($subclassA1, SubclassAType::fromFoo('1'));
+        $this->assertSame($subclassB11, SubclassBType::fromFooAndBar('1', 1));
+        $this->assertSame($subclassC11, SubclassCType::fromFooAndBar('1', 1));
+
+        $this->assertNotSame($subclassA1,$subclassB11);
+        $this->assertNotSame($subclassA1,$subclassC11);
+        $this->assertNotSame($subclassB11,$subclassC11);
+    }
+
+    public function testNoConstructor(): void
+    {
+        $this->expectException(\LogicException::class);
+        NoConstructorType::fromFoo('foo');
+    }
 }
 
-class FromValuesType implements ValueObjectInterface
+class FromValuesType
 {
     use ValueObjectTrait;
 
@@ -50,9 +70,15 @@ class FromValuesType implements ValueObjectInterface
     /** @var int */
     private $bar;
 
+    private function __construct(string $foo, int $bar)
+    {
+        $this->foo = $foo;
+        $this->bar = $bar;
+    }
+
     public static function fromFooAndBar(string $foo, int $bar): self
     {
-        return self::fromValues($foo, $bar);
+        return self::getInstance($foo, $bar);
     }
 
     public function getFoo()
@@ -66,7 +92,7 @@ class FromValuesType implements ValueObjectInterface
     }
 }
 
-class GettersType implements ValueObjectInterface
+class GettersType
 {
     use ValueObjectTrait;
 
@@ -76,9 +102,15 @@ class GettersType implements ValueObjectInterface
     /** @var int */
     private $bar;
 
+    public function __construct(string $foo, int $bar)
+    {
+        $this->foo = $foo;
+        $this->bar = $bar;
+    }
+
     public static function fromFooAndBar(string $foo, int $bar): self
     {
-        return self::fromValues($foo, $bar);
+        return self::getInstance($foo, $bar);
     }
 
     public function getFoo()
@@ -89,5 +121,85 @@ class GettersType implements ValueObjectInterface
     public function getBar()
     {
         return $this->bar;
+    }
+}
+
+abstract class SuperclassType
+{
+    use ValueObjectTrait;
+
+    /** @var string */
+    private $foo;
+
+    protected function __construct(string $foo)
+    {
+        $this->foo = $foo;
+    }
+
+    public function getFoo(): string
+    {
+        return $this->foo;
+    }
+}
+
+class SubclassAType extends SuperclassType
+{
+    public static function fromFoo(string $foo): self
+    {
+        return self::getInstance($foo);
+    }
+}
+
+class SubclassBType extends SuperclassType
+{
+    /** @var int */
+    private $barB;
+
+    protected function __construct(string $foo, int $barB)
+    {
+        parent::__construct($foo);
+        $this->barB = $barB;
+    }
+
+    public static function fromFooAndBar(string $foo, int $bar): self
+    {
+        return static::getInstance($foo, $bar);
+    }
+
+    public function getBarB(): int
+    {
+        return $this->barB;
+    }
+}
+
+class SubclassCType extends SuperclassType
+{
+    /** @var int */
+    private $barC;
+
+    protected function __construct(string $foo, int $barC)
+    {
+        parent::__construct($foo);
+        $this->barC = $barC;
+    }
+
+    public static function fromFooAndBar(string $foo, int $bar): self
+    {
+        return static::getInstance($foo, $bar);
+    }
+
+    public function getBarC(): int
+    {
+        return $this->barC;
+    }
+}
+
+class NoConstructorType
+{
+    use ValueObjectTrait;
+
+    public static function fromFoo(string $foo)
+    {
+        return self::getInstance($foo);
     }
 }

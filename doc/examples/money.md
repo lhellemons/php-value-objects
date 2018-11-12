@@ -1,13 +1,14 @@
 The Money pattern
 =================
 
-One of the most common value object patterns is the Money pattern, described by
-Martin Fowler (TODO add reference). Here is a sample implementation using value objects:
+One of the most common value object patterns is the Money pattern, as described by
+Martin Fowler (https://martinfowler.com/eaaCatalog/money.html).
+Here is a sample implementation using a ValueObject:
 
 ```php
-class Currency implements ValueObjectInterface
+class Currency implements EnumInterface
 {
-    use ValueObjectTrait;
+    use EnumTrait;
     
     public static function EUR(): self
     {
@@ -25,7 +26,7 @@ class Currency implements ValueObjectInterface
     }
 }
 
-class Money implements ValueObjectInterface
+final class Money
 {
     use ValueObjectTrait;
     
@@ -34,15 +35,21 @@ class Money implements ValueObjectInterface
     
     /** @var Currency */
     private $currency;
+
+    private function __construct(int $amount, Currency $currency)
+    {
+        $this->amount = $amount;
+        $this->currency = $currency;
+    }
     
     public static function zero(Currency $currency): self
     {
-        return self::fromPropertyValues(['amount' => 0, 'currency' => $currency]);
+        return self::getInstance(0, $currency);
     }
     
     public static function amount(int $amount, Currency $currency): self
     {
-        return self::fromPropertyValues(['amount' => $amount, 'currency' => $currency]);
+        return self::getInstance($amount, $currency);
     }
     
     public function add(Money $money): self
@@ -61,19 +68,32 @@ class Money implements ValueObjectInterface
     
     public function multiply(float $multiplier): self
     {
-        return self::amount(round($this->amount * $multiplier), $this->currency);
+        return self::amount(round($this->amount * $multiplier, 0), $this->currency);
     }
-    
+
+    /**
+     * @param int $count The number of places to allocate the money to. Must be greater than 0.
+     * @return Money[]   An array of $count Money objects that sum to the original money
+     */
     public function allocate(int $count): array
     {
-        // TODO allocate algorithm
+        if ($count <= 0) {
+            throw new DomainException('Cannot allocate to 0 or fewer places');
+        }
+
+        $share = $this->multiply(1 / $count);
+        $shares = array_fill(0, $count, $share);
+        $remainder = $this->subtract($share->multiply($count), $result);
+        $results[$count-1] = $results[$count-1]->add($remainder);
+
+        return $results;
     }
     
     private function assertSameCurrency(Money $money): void
     {
         if ($money->currency !== $this->currency) {
             throw new DomainException(
-                sprintf(
+                \sprintf(
                     'Trying to operate on Money objects of different currencies %s and %s',
                     $this->currency,
                     $money->currency
@@ -85,7 +105,7 @@ class Money implements ValueObjectInterface
 
 ```
 
-This class could be used as such:
+This class could be used as follows:
 
 ```php
 $usd = Currency::USD();
@@ -95,7 +115,7 @@ $price2 = Money::amount(500, $usd);
 $totalPrice = $price1->add($price2);
 $totalPriceWithVat = $price->add($totalPrice->multiply(0.2));
 $nrOfTerms = 2;
-$termPrices = $price->allocate($nrOfTerms);
+$termPrices = $totalPrice->allocate($nrOfTerms);
 
-// $termPrices == [Money::amount(900, $usd), Monay::amount(900, $usd)] 
+// $termPrices == [Money::amount(750, $usd), Monay::amount(750, $usd)]
 ```
