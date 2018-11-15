@@ -33,6 +33,21 @@ final class ClassType extends Type
         return self::fromFullyQualifiedClassName(\get_class($instance));
     }
 
+    public static function fromCaller(int $level = 1): self
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $level + 2);
+
+        if (\count($trace) < ($level + 2)) {
+            throw new \LogicException(sprintf('Call stack is not deep enough to get the level-%d caller', $level));
+        }
+
+        if ($callingClass = $trace[$level + 1]['class']) {
+            return self::fromFullyQualifiedClassName($callingClass);
+        }
+
+        throw new \RuntimeException(sprintf('Level %d caller has no class', $level));
+    }
+
     public function getReflectionClass(): ReflectionClass
     {
         return $this->reflectionClass = $this->reflectionClass ?: new ReflectionClass($this->getFullyQualifiedName());
@@ -63,5 +78,4 @@ final class ClassType extends Type
     {
         return $this->callStaticMethod($name,...$arguments);
     }
-
 }

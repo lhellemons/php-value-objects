@@ -86,6 +86,11 @@ class ClassTypeTest extends TestCase
         $this->assertEquals(ExistingClass::class, $reflectionClass->getName());
     }
 
+    public function testFromCaller(): void
+    {
+        $this->assertEquals(Type::named(ClassThatCallsFromCaller::class), ClassThatCallsFromCaller::getType());
+    }
+
     private function getAnonymousClassInstance(): object
     {
         return new class() {};
@@ -107,5 +112,18 @@ class ClassWithStaticMethod
     public static function staticMethod($argument)
     {
         return $argument;
+    }
+}
+
+class ClassThatCallsFromCaller
+{
+    public static function getType(): ClassType
+    {
+        return self::callFromCaller();
+    }
+
+    public static function callFromCaller(): ClassType
+    {
+        return ClassType::fromCaller();
     }
 }
