@@ -20,7 +20,27 @@ abstract class Type
         $this->kind = $kind;
     }
 
-    public function getName(): string
+    public static function named($fullyQualifiedName): self
+    {
+        if (class_exists($fullyQualifiedName)) {
+            return ClassType::fromFullyQualifiedClassName($fullyQualifiedName);
+        }
+        if (interface_exists($fullyQualifiedName)) {
+            return InterfaceType::fromFullyQualifiedInterfaceName($fullyQualifiedName);
+        }
+        if (trait_exists($fullyQualifiedName)) {
+            return TraitType::fromFullyQualifiedTraitName($fullyQualifiedName);
+        }
+
+        throw new \InvalidArgumentException(sprintf('Unsupported type: %s', $fullyQualifiedName));
+    }
+
+    public static function of(object $instance): ClassType
+    {
+        return ClassType::fromInstance($instance);
+    }
+
+    public function getFullyQualifiedName(): string
     {
         return $this->name;
     }
@@ -32,12 +52,12 @@ abstract class Type
 
     final public function __toString(): string
     {
-        return sprintf('%s %s', $this->kind->getId(), $this->getName());
+        return sprintf('%s %s', $this->kind->getId(), $this->getFullyQualifiedName());
     }
 
     final public function isSuperTypeOf(Type $type): bool
     {
-        return $type === $this || is_subclass_of($type->getName(), $this->getName(),true);
+        return $type === $this || is_subclass_of($type->getFullyQualifiedName(), $this->getFullyQualifiedName(),true);
     }
 
     final public function isSubTypeOf(Type $type): bool
@@ -47,6 +67,6 @@ abstract class Type
 
     final public function isInstance(object $object): bool
     {
-        return $this->isSuperTypeOf(ClassType::fromClassString(\get_class($object)));
+        return $this->isSuperTypeOf(ClassType::fromInstance($object));
     }
 }

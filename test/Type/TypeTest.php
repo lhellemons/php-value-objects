@@ -13,107 +13,74 @@ use SolidPhp\ValueObjects\Type\ClassType;
 use SolidPhp\ValueObjects\Type\InterfaceType;
 use SolidPhp\ValueObjects\Type\TraitType;
 use SolidPhp\ValueObjects\Type\Kind;
+use SolidPhp\ValueObjects\Type\Type;
+use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingClass;
+use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingInterface;
+use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingTrait;
 
 class TypeTest extends TestCase
 {
     /**
-     * @dataProvider   getCasesForExistingType
-     *
-     * @param string $classString
-     * @param Kind   $kind
+     * @dataProvider getCasesForNamed
+     * @param string $fullyQualifiedName
+     * @param null|Kind $expectedKind
      */
-    public function testExistingType(string $classString, Kind $kind): void
+    public function testNamed(string $fullyQualifiedName, ?Kind $expectedKind): void
     {
-        $type = null;
-        switch ($kind) {
-            case Kind::INTERFACE():
-                $type = InterfaceType::fromClassString($classString);
-                break;
-            case Kind::TRAIT():
-                $type = TraitType::fromClassString($classString);
-                break;
-            case Kind::CLASS():
-                $type = ClassType::fromClassString($classString);
-                break;
+        if ($expectedKind) {
+            $this->assertSame($expectedKind, Type::named($fullyQualifiedName)->getKind());
+        } else {
+            $this->expectException(\InvalidArgumentException::class);
+            Type::named($fullyQualifiedName);
         }
-
-        $this->assertEquals($classString, $type->getName());
-        $this->assertEquals($kind, $type->getKind());
     }
 
-    public function getCasesForExistingType(): array
+    public function getCasesForNamed(): array
     {
         return [
-            'ExistingClass'     => [ExistingClass::class, Kind::CLASS()],
-            'ExistingInterface' => [ExistingInterface::class, Kind::INTERFACE()],
-            'ExistingTrait'     => [ExistingTrait::class, Kind::TRAIT()],
+            'existing class'     => [ExistingClass::class, Kind::CLASS()],
+            'existing interface' => [ExistingInterface::class, Kind::INTERFACE()],
+            'existing trait'     => [ExistingTrait::class, Kind::TRAIT()],
+            'non-existing name'  => ['NonExistingName', null],
         ];
     }
 
     /**
-     * @dataProvider getCasesForNonExistingType
-     *
-     * @param string $classString
-     * @param Kind   $kind
+     * @dataProvider getCasesForOf
+     * @param mixed $instance
+     * @param Type $expectedType
      */
-    public function testNonExistingType(string $classString, Kind $kind): void
+    public function testOf(object $instance, Type $expectedType): void
     {
-        $this->expectException(\RuntimeException::class);
-
-        switch ($kind) {
-            case Kind::INTERFACE():
-                InterfaceType::fromClassString($classString);
-                break;
-            case Kind::TRAIT():
-                TraitType::fromClassString($classString);
-                break;
-            case Kind::CLASS():
-                ClassType::fromClassString($classString);
-                break;
-        }
+        $this->assertSame($expectedType, Type::of($instance));
     }
 
-    public function getCasesForNonExistingType(): array
+    public function getCasesForOf(): array
     {
         return [
-            'non-existing class'     => ['NonExistingClass', Kind::CLASS()],
-            'non-existing interface' => ['NonExistingInterface', Kind::INTERFACE()],
-            'non-existing trait'     => ['NonExistingTrait', Kind::TRAIT()],
-            'class as interface'     => [ExistingClass::class, Kind::INTERFACE()],
-            'class as trait'         => [ExistingClass::class, Kind::TRAIT()],
-            'interface as class'     => [ExistingInterface::class, Kind::CLASS()],
-            'interface as trait'     => [ExistingInterface::class, Kind::TRAIT()],
-            'trait as interface'     => [ExistingTrait::class, Kind::INTERFACE()],
-            'trait as class'         => [ExistingTrait::class, Kind::CLASS()],
+            'plain object' => [new ExistingClass(), Type::named(ExistingClass::class)],
+            'anonymous class' => [$this->getAnonymousClassInstance(), Type::named(\get_class($this->getAnonymousClassInstance()))]
         ];
     }
 
     public function testIdentity(): void
     {
         $this->assertSame(
-            ClassType::fromClassString(ExistingClass::class),
-            ClassType::fromClassString(ExistingClass::class)
+            ClassType::fromFullyQualifiedClassName(ExistingClass::class),
+            ClassType::fromFullyQualifiedClassName(ExistingClass::class)
         );
         $this->assertSame(
-            InterfaceType::fromClassString(ExistingInterface::class),
-            InterfaceType::fromClassString(ExistingInterface::class)
+            InterfaceType::fromFullyQualifiedInterfaceName(ExistingInterface::class),
+            InterfaceType::fromFullyQualifiedInterfaceName(ExistingInterface::class)
         );
         $this->assertSame(
-            TraitType::fromClassString(ExistingTrait::class),
-            TraitType::fromClassString(ExistingTrait::class)
+            TraitType::fromFullyQualifiedTraitName(ExistingTrait::class),
+            TraitType::fromFullyQualifiedTraitName(ExistingTrait::class)
         );
     }
-}
 
-
-interface ExistingInterface
-{
-}
-
-trait ExistingTrait
-{
-}
-
-class ExistingClass implements ExistingInterface
-{
+    private function getAnonymousClassInstance(): object
+    {
+        return new class() {};
+    }
 }
