@@ -55,18 +55,18 @@ abstract class Type
         return sprintf('%s %s', $this->kind->getId(), $this->getFullyQualifiedName());
     }
 
-    final public function isSuperTypeOf(Type $type): bool
+    final public function isSupertypeOf(Type $type): bool
     {
         return $type === $this || is_subclass_of($type->getFullyQualifiedName(), $this->getFullyQualifiedName(),true);
     }
 
-    final public function isSubTypeOf(Type $type): bool
+    final public function isSubtypeOf(Type $type): bool
     {
-        return $type->isSuperTypeOf($this);
+        return $type->isSupertypeOf($this);
     }
 
     final public function isInstance(object $object): bool
     {
-        return $this->isSuperTypeOf(ClassType::fromInstance($object));
+        return $this->isSupertypeOf(ClassType::fromInstance($object));
     }
 }
