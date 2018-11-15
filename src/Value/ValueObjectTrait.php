@@ -22,7 +22,7 @@ trait ValueObjectTrait
     /** @var self[] */
     static private $instances = [];
 
-    protected function __construct(...$values)
+    protected function __construct(...$arguments)
     {
         throw new \LogicException(sprintf('Class %s uses ValueObjectTrait but does not define a private or protected constructor.', static::class));
     }

@@ -40,14 +40,17 @@ class ValueObjectTraitTest extends TestCase
 
     public function testInheritance(): void
     {
+        $superclass1 = SuperclassType::fromFoo('1');
         $subclassA1 = SubclassAType::fromFoo('1');
         $subclassB11 = SubclassBType::fromFooAndBar('1', 1);
         $subclassC11 = SubclassCType::fromFooAndBar('1',1);
 
+        $this->assertSame($superclass1, SuperclassType::fromFoo('1'));
         $this->assertSame($subclassA1, SubclassAType::fromFoo('1'));
         $this->assertSame($subclassB11, SubclassBType::fromFooAndBar('1', 1));
         $this->assertSame($subclassC11, SubclassCType::fromFooAndBar('1', 1));
 
+        $this->assertNotSame($superclass1, $subclassA1);
         $this->assertNotSame($subclassA1,$subclassB11);
         $this->assertNotSame($subclassA1,$subclassC11);
         $this->assertNotSame($subclassB11,$subclassC11);
@@ -124,7 +127,7 @@ class GettersType
     }
 }
 
-abstract class SuperclassType
+class SuperclassType
 {
     use ValueObjectTrait;
 
@@ -136,6 +139,11 @@ abstract class SuperclassType
         $this->foo = $foo;
     }
 
+    public static function fromFoo(string $foo): self
+    {
+        return self::getInstance($foo);
+    }
+
     public function getFoo(): string
     {
         return $this->foo;
@@ -144,10 +152,6 @@ abstract class SuperclassType
 
 class SubclassAType extends SuperclassType
 {
-    public static function fromFoo(string $foo): self
-    {
-        return self::getInstance($foo);
-    }
 }
 
 class SubclassBType extends SuperclassType
