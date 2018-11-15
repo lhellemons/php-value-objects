@@ -32,8 +32,9 @@ class FooBarEnum implements EnumInterface
 FooBarEnum::FOO() === FooBarEnum::FOO() // evaluates to true
 ```
 
-You can even pass extra initialization data to your define calls and use it to set extra properties for your instances,
-by overriding the `initialize` method
+If you want to store extra data on your Enum instances, you can add a constructor function.
+The constructor will be passed the id and any extra arguments passed to the `define` calls by
+your factory methods; you can use them just as in normal classes.
 
 
 ```php
@@ -44,7 +45,7 @@ class FooBarEnum implements EnumInterface
     /** @var string */
     private $message;
 
-    protected function initialize(string $message): void
+    protected function __construct(string $id, string $message): void
     {
         $this-message = $message;
     }
@@ -67,3 +68,13 @@ class FooBarEnum implements EnumInterface
 
 echo FooBarEnum::FOO()->getMessage(); // outputs 'foo mama'
 ```
+
+The Enum classes can have subclasses as well, but the following caveats apply:
+- although the factory methods are inherited from the parent Enum, these still
+  produce instances of the class on which they are called, so Parent::FOO() _will not be
+  equal to_ Child::FOO().
+- If the parent class defines factory methods that are not overridden by the child class,
+  and the child has its own constructor, the constructor must accept at least the same
+  parameters as the parent constructor, and any extra parameters not accepted by the parent
+  constructor must be optional, so that the data from the parent factory methods can be
+  accepted by the child constructor.

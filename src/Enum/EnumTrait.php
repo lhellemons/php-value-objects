@@ -70,43 +70,33 @@ namespace SolidPhp\ValueObjects\Enum;
  */
 trait EnumTrait /* implements EnumInterface */
 {
-    /** @var array EnumTrait[] */
-    private static $instances = [];
+    private static $instancesById;
 
-    /** @var bool */
-    private static $allInstancesInitialized = false;
-
-    /** @var string */
-    private $id;
+    /** @var array */
+    private static $allInstancesInitialized = [];
 
     /**
-     * Constructs a new instance of this Enum class.
-     * This method is made private to enforce the use of factory methods
+     * Default constructor.
+     * Override this method in your using class to store the id or any extra data in the instance
+     *
      * @param string $id
-     * @param array $initializationData
+     * @param mixed[] $constructorArguments
      */
-    private function __construct(string $id, ...$initializationData)
-    {
-        $this->id = $id;
-
-        $this->initialize(...$initializationData);
-    }
-
-    /**
-     * Override this function to initialize your instance with custom data
-     * @param mixed ...$data
-     */
-    protected function initialize(...$data): void
+    protected function __construct(string $id, ...$constructorArguments)
     {
     }
 
-    final protected static function define(string $id, ...$initializationData)
+    final protected static function define(string $id, ...$constructorArguments)
     {
-        if (!isset(static::$instances[$id])) {
-            static::$instances[$id] = new static($id, ...$initializationData);
+        if (!isset(self::$instancesById[static::class])) {
+            self::$instancesById[static::class] = [];
         }
 
-        return static::$instances[$id];
+        if (!isset(self::$instancesById[static::class][$id])) {
+            self::$instancesById[static::class][$id] = new static($id, ...$constructorArguments);
+        }
+
+        return self::$instancesById[static::class][$id];
     }
 
     /**
@@ -116,10 +106,10 @@ trait EnumTrait /* implements EnumInterface */
      */
     final public static function instance(string $id, bool $throwIfNotFound = false)
     {
-        static::_ensureAllInstancesInitialized();
+        static::_ensureAllInstancesInitialized(static::class);
 
-        if (isset(static::$instances[$id])) {
-            return static::$instances[$id];
+        if (isset(self::$instancesById[static::class][$id])) {
+            return self::$instancesById[static::class][$id];
         }
 
         if ($throwIfNotFound) {
@@ -134,21 +124,29 @@ trait EnumTrait /* implements EnumInterface */
      */
     final public static function instances(): array
     {
-        static::_ensureAllInstancesInitialized();
+        static::_ensureAllInstancesInitialized(static::class);
 
-        return array_values(static::$instances);
+        return array_values(self::$instancesById[static::class]);
     }
 
     final public function getId(): string
     {
-        return $this->id;
+        static::_ensureAllInstancesInitialized(static::class);
+
+        foreach (self::$instancesById[static::class] as $id => $instance) {
+            if ($instance === $this) {
+                return $id;
+            }
+        }
+
+        return null;
     }
 
-    private static function _ensureAllInstancesInitialized(): void
+    private static function _ensureAllInstancesInitialized(string $class): void
     {
-        if (!static::$allInstancesInitialized) {
-            initialize_all_enum_instances(static::class);
-            static::$allInstancesInitialized = true;
+        if (!isset(self::$allInstancesInitialized[$class])) {
+            initialize_all_enum_instances($class);
+            self::$allInstancesInitialized[$class] = true;
         }
     }
 }
@@ -159,7 +157,10 @@ function initialize_all_enum_instances(string $enumClass): void
         $reflectionClass = new \ReflectionClass($enumClass);
 
         /** @var \ReflectionMethod[] $factoryMethods */
-        $factoryMethods = array_filter($reflectionClass->getMethods(), 'SolidPhp\ValueObjects\Enum\is_enum_factory_method');
+        $factoryMethods = array_filter(
+            $reflectionClass->getMethods(),
+            'SolidPhp\ValueObjects\Enum\is_enum_factory_method'
+        );
         foreach ($factoryMethods as $method) {
             $method->invoke(null);
         }
@@ -174,5 +175,5 @@ function is_enum_factory_method(\ReflectionMethod $method): bool
         && $method->isStatic()
         && $method->getNumberOfParameters() === 0
         && ($returnType = $method->getReturnType())
-        && \in_array($returnType->getName(),['self', $method->getDeclaringClass()->getName()], true);
+        && \in_array($returnType->getName(), ['self', $method->getDeclaringClass()->getName()], true);
 }

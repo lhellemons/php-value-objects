@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\SolidPhp\ValueObjects\Value;
+namespace Test\SolidPhp\ValueObjects\Enum\EnumTrait;
 
 use PHPUnit\Framework\TestCase;
 use SolidPhp\ValueObjects\Enum\EnumInterface;
@@ -40,6 +40,14 @@ class EnumTraitTest extends TestCase
     {
         $this->assertEquals('eno', TestInitializeEnum::ONE()->getMessage());
         $this->assertEquals('owt', TestInitializeEnum::TWO()->getMessage());
+    }
+
+    public function testInheritance(): void
+    {
+        $this->assertSame(TestInheritanceParentEnum::PARENT(), TestInheritanceParentEnum::PARENT());
+        $this->assertSame(TestInheritanceChildEnum::PARENT(), TestInheritanceChildEnum::PARENT());
+        $this->assertNotSame(TestInheritanceParentEnum::PARENT(), TestInheritanceChildEnum::PARENT());
+        $this->assertNotSame(TestInheritanceParentEnum::PARENT(), TestInheritanceChildEnum::PARENT());
     }
 }
 
@@ -111,7 +119,7 @@ class TestInitializeEnum implements EnumInterface
     /** @var string */
     private $message;
 
-    protected function initialize(string $message): void
+    protected function __construct(string $id, string $message)
     {
         $this->message = $message;
     }
@@ -129,5 +137,51 @@ class TestInitializeEnum implements EnumInterface
     public static function TWO(): self
     {
         return self::define('two', 'owt');
+    }
+}
+
+
+class TestInheritanceParentEnum implements EnumInterface
+{
+    use EnumTrait;
+
+    /** @var string */
+    private $parentProp;
+
+    protected function __construct(string $id, string $parentProp)
+    {
+        $this->parentProp = $parentProp;
+    }
+
+    public static function PARENT(): self
+    {
+        return self::define('PARENT', 'parentPropValue');
+    }
+
+    public function getParentProp()
+    {
+        return $this->parentProp;
+    }
+}
+
+class TestInheritanceChildEnum extends TestInheritanceParentEnum
+{
+    /** @var null|string */
+    private $childProp;
+
+    protected function __construct(string $id, string $parentPropValue, ?string $childPropValue = null)
+    {
+        parent::__construct($id, $parentPropValue);
+        $this->childProp = $childPropValue;
+    }
+
+    public static function CHILD(): self
+    {
+        return self::define('CHILD', 'parentPropValue', 'childPropValue');
+    }
+
+    public function getChildProp()
+    {
+        return $this->childProp;
     }
 }
