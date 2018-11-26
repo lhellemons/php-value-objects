@@ -111,10 +111,10 @@ trait EnumTrait /* implements EnumInterface */
 
     /**
      * @param string $id
-     * @param bool $thowIfNotFound
+     * @param bool $throwIfNotFound
      * @return null|$this
      */
-    final public static function instance(string $id, bool $thowIfNotFound = false)
+    final public static function instance(string $id, bool $throwIfNotFound = false)
     {
         static::_ensureAllInstancesInitialized();
 
@@ -122,7 +122,7 @@ trait EnumTrait /* implements EnumInterface */
             return static::$instances[$id];
         }
 
-        if ($thowIfNotFound) {
+        if ($throwIfNotFound) {
             throw new \DomainException(sprintf('Enum class %s has no instance "%s"', static::class, $id));
         }
 
