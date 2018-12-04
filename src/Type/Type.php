@@ -20,22 +20,30 @@ abstract class Type
         $this->kind = $kind;
     }
 
-    public static function named($fullyQualifiedName): self
+    /**
+     * @param string|object $source
+     *
+     * @return Type
+     */
+    public static function of($source): self
     {
-        if (class_exists($fullyQualifiedName)) {
-            return ClassType::fromFullyQualifiedClassName($fullyQualifiedName);
+        if (is_object($source)) {
+            return ClassType::fromInstance($source);
         }
-        if (interface_exists($fullyQualifiedName)) {
-            return InterfaceType::fromFullyQualifiedInterfaceName($fullyQualifiedName);
+        if (class_exists($source)) {
+            return ClassType::fromFullyQualifiedClassName($source);
         }
-        if (trait_exists($fullyQualifiedName)) {
-            return TraitType::fromFullyQualifiedTraitName($fullyQualifiedName);
+        if (interface_exists($source)) {
+            return InterfaceType::fromFullyQualifiedInterfaceName($source);
+        }
+        if (trait_exists($source)) {
+            return TraitType::fromFullyQualifiedTraitName($source);
         }
 
-        throw new \InvalidArgumentException(sprintf('Unsupported type: %s', $fullyQualifiedName));
+        throw new \InvalidArgumentException(sprintf('Unsupported type: %s', $source));
     }
 
-    public static function of(object $instance): ClassType
+    public static function ofInstance(object $instance): ClassType
     {
         return ClassType::fromInstance($instance);
     }

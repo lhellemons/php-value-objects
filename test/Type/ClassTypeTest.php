@@ -25,8 +25,8 @@ class ClassTypeTest extends TestCase
     public function getCasesForFromInstance(): array
     {
         return [
-            'plain object' => [new ExistingClass(), Type::named(ExistingClass::class)],
-            'anonymous object' => [$this->getAnonymousClassInstance(), Type::named(\get_class($this->getAnonymousClassInstance()))]
+            'plain object' => [new ExistingClass(), Type::of(ExistingClass::class)],
+            'anonymous object' => [$this->getAnonymousClassInstance(), Type::of(\get_class($this->getAnonymousClassInstance()))]
         ];
     }
 
@@ -88,7 +88,7 @@ class ClassTypeTest extends TestCase
 
     public function testFromCaller(): void
     {
-        $this->assertEquals(Type::named(ClassThatCallsFromCaller::class), ClassThatCallsFromCaller::getType());
+        $this->assertEquals(Type::of(ClassThatCallsFromCaller::class), ClassThatCallsFromCaller::getType());
     }
 
     private function getAnonymousClassInstance(): object

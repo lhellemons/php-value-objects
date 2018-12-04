@@ -17,26 +17,26 @@ use SolidPhp\ValueObjects\Type\Type;
 use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingClass;
 use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingInterface;
 use Test\SolidPhp\ValueObjects\Type\TestObjects\ExistingTrait;
-use Test\SolidPhp\ValueObjects\Value\SuperclassType;
 
 class TypeTest extends TestCase
 {
     /**
-     * @dataProvider getCasesForNamed
+     * @dataProvider getCasesForOfString
+     *
      * @param string $fullyQualifiedName
      * @param null|Kind $expectedKind
      */
-    public function testNamed(string $fullyQualifiedName, ?Kind $expectedKind): void
+    public function testOfString(string $fullyQualifiedName, ?Kind $expectedKind): void
     {
         if ($expectedKind) {
-            $this->assertSame($expectedKind, Type::named($fullyQualifiedName)->getKind());
+            $this->assertSame($expectedKind, Type::of($fullyQualifiedName)->getKind());
         } else {
             $this->expectException(\InvalidArgumentException::class);
-            Type::named($fullyQualifiedName);
+            Type::of($fullyQualifiedName);
         }
     }
 
-    public function getCasesForNamed(): array
+    public function getCasesForOfString(): array
     {
         return [
             'existing class'     => [ExistingClass::class, Kind::CLASS()],
@@ -47,22 +47,28 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @dataProvider getCasesForOf
-     * @param mixed $instance
-     * @param Type $expectedType
+     * @dataProvider getCasesForOfObject
+     *
+     * @param mixed $source
+     * @param Type  $expectedType
      */
-    public function testOf(object $instance, Type $expectedType): void
+    public function testOfObject($source, ?Type $expectedType): void
     {
-        $this->assertSame($expectedType, Type::of($instance));
+        if ($expectedType === null) {
+            $this->expectException(\InvalidArgumentException::class);
+            Type::of($source);
+        } else {
+            $this->assertSame($expectedType, Type::of($source));
+        }
     }
 
-    public function getCasesForOf(): array
+    public function getCasesForOfObject(): array
     {
         return [
-            'plain object'    => [new ExistingClass(), Type::named(ExistingClass::class)],
+            'plain object'    => [new ExistingClass(), Type::of(ExistingClass::class)],
             'anonymous class' => [
                 $this->getAnonymousClassInstance(),
-                Type::named(\get_class($this->getAnonymousClassInstance()))
+                Type::of(\get_class($this->getAnonymousClassInstance()))
             ]
         ];
     }
@@ -96,14 +102,14 @@ class TypeTest extends TestCase
 
     public function getCasesForIsSuperTypeOf(): array
     {
-        $class = Type::named(TestClass::class);
-        $trait = Type::named(TestTrait::class);
-        $interface = Type::named(TestInterface::class);
-        $subclass = Type::named(TestSubclass::class);
-        $classImplementsInterface = Type::named(TestClassImplementsTestInterface::class);
-        $subclassImplementsInterface = Type::named(TestSubclassImplementsTestInterface::class);
-        $classUsesTrait = Type::named(TestClassUsesTestTrait::class);
-        $subclassUsesTrait = Type::named(TestSubclassUsesTestTrait::class);
+        $class = Type::of(TestClass::class);
+        $trait = Type::of(TestTrait::class);
+        $interface = Type::of(TestInterface::class);
+        $subclass = Type::of(TestSubclass::class);
+        $classImplementsInterface = Type::of(TestClassImplementsTestInterface::class);
+        $subclassImplementsInterface = Type::of(TestSubclassImplementsTestInterface::class);
+        $classUsesTrait = Type::of(TestClassUsesTestTrait::class);
+        $subclassUsesTrait = Type::of(TestSubclassUsesTestTrait::class);
 
         return [
             'same class'            => [$class, $class, true],
@@ -131,14 +137,14 @@ class TypeTest extends TestCase
 
     public function getCasesForIsSubTypeOf(): array
     {
-        $class = Type::named(TestClass::class);
-        $trait = Type::named(TestTrait::class);
-        $interface = Type::named(TestInterface::class);
-        $subclass = Type::named(TestSubclass::class);
-        $classImplementsInterface = Type::named(TestClassImplementsTestInterface::class);
-        $subclassImplementsInterface = Type::named(TestSubclassImplementsTestInterface::class);
-        $classUsesTrait = Type::named(TestClassUsesTestTrait::class);
-        $subclassUsesTrait = Type::named(TestSubclassUsesTestTrait::class);
+        $class = Type::of(TestClass::class);
+        $trait = Type::of(TestTrait::class);
+        $interface = Type::of(TestInterface::class);
+        $subclass = Type::of(TestSubclass::class);
+        $classImplementsInterface = Type::of(TestClassImplementsTestInterface::class);
+        $subclassImplementsInterface = Type::of(TestSubclassImplementsTestInterface::class);
+        $classUsesTrait = Type::of(TestClassUsesTestTrait::class);
+        $subclassUsesTrait = Type::of(TestSubclassUsesTestTrait::class);
 
         return [
             'same class'            => [$class, $class, true],
@@ -166,14 +172,12 @@ class TypeTest extends TestCase
 
     public function getCasesForIsInstance(): array
     {
-        $class = Type::named(TestClass::class);
-        $trait = Type::named(TestTrait::class);
-        $interface = Type::named(TestInterface::class);
-        $subclass = Type::named(TestSubclass::class);
-        $classImplementsInterface = Type::named(TestClassImplementsTestInterface::class);
-        $subclassImplementsInterface = Type::named(TestSubclassImplementsTestInterface::class);
-        $classUsesTrait = Type::named(TestClassUsesTestTrait::class);
-        $subclassUsesTrait = Type::named(TestSubclassUsesTestTrait::class);
+        $class = Type::of(TestClass::class);
+        $trait = Type::of(TestTrait::class);
+        $interface = Type::of(TestInterface::class);
+        $subclass = Type::of(TestSubclass::class);
+        $classUsesTrait = Type::of(TestClassUsesTestTrait::class);
+        $subclassUsesTrait = Type::of(TestSubclassUsesTestTrait::class);
 
         return [
             'class'                  => [$class, new TestClass(), true],
