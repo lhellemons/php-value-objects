@@ -11,10 +11,14 @@ does implicit type conversion, which yields false positives, for example when co
 that happens to be boolean true. The equality-by-identity operator "===" only yields true if the two operands
 are literally the same object instance, which makes sense for entities but not for value objects.
 
-The Value namespace contains the ValueObjectTrait, which will help you use value objects in your project.
+The Value namespace contains the `ValueObjectTrait`, which will help you use value objects in your project.
 The main advantage is that the same combination of constructor parameters will yield the same instance,
-so that it becomes possible to use strict comparison (===) to compare value objects.
-You can designate a class as a value object as follows:
+so that it becomes possible to use strict comparison (`===`) to compare value objects.
+
+For most cases, you will want a value object represented by a single value. For those cases,
+you can use the `SingleValueObject` types. Read about them [here](single-value-objects.md)
+
+If you want the ability to take in any number of values, you can designate a class as a value object as follows:
 - Add the ValueObjectTrait to the class
 - Make the class constructor private (or protected, if you want to support subclasses).
 - Add one or more public static factory methods to the class. The factory methods should validate and normalize
@@ -78,7 +82,12 @@ $myOtherPoint = Point::fromCoordinates(1, 3);
 $myPoint === $myOtherPoint; // false
 ```
 
-Important things to remember:
+<a name="considerations"></a>
+Important things to remember
+----------------------------
+
+Value objects add many advantages to your codebase, but these come with the following caveats:
+
 - Never mutate the value of your instance properties! You can add non-static factory methods that
   use `static::getInstance` to construct a new instance based on the current instance.
   This also means no setter methods! Check out the [money example](examples/money.md).

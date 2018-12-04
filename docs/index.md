@@ -10,6 +10,7 @@ Contents
 --------
 - [Usage](usage.md)
 - [Value objects](value-objects.md)
+  - [Single value objects](single-value-objects.md)
 - [Enums](enums.md)
 - [Types](types.md)
 - [Examples](examples)
