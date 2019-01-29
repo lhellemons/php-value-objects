@@ -165,7 +165,7 @@ class TypeTest extends TestCase
      * @param mixed $object
      * @param bool $expectedResult
      */
-    public function testIsInstance(Type $type, object $object, bool $expectedResult): void
+    public function testIsInstance(Type $type, $object, bool $expectedResult): void
     {
         $this->assertEquals($expectedResult, $type->isInstance($object));
     }
@@ -196,7 +196,7 @@ class TypeTest extends TestCase
         ];
     }
 
-    private function getAnonymousClassInstance(): object
+    private function getAnonymousClassInstance()
     {
         return new class()
         {

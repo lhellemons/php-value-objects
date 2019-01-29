@@ -43,7 +43,12 @@ abstract class Type
         throw new \InvalidArgumentException(sprintf('Unsupported type: %s', $source));
     }
 
-    public static function ofInstance(object $instance): ClassType
+    /**
+     * @param object $instance
+     *
+     * @return ClassType
+     */
+    public static function ofInstance($instance): ClassType
     {
         return ClassType::fromInstance($instance);
     }
@@ -73,7 +78,12 @@ abstract class Type
         return $type->isSupertypeOf($this);
     }
 
-    final public function isInstance(object $object): bool
+    /**
+     * @param object $object
+     *
+     * @return bool
+     */
+    final public function isInstance($object): bool
     {
         return $this->isSupertypeOf(ClassType::fromInstance($object));
     }

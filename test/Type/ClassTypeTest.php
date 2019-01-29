@@ -14,10 +14,10 @@ class ClassTypeTest extends TestCase
 {
     /**
      * @dataProvider getCasesForFromInstance
-     * @param mixed $instance
+     * @param object $instance
      * @param Type $expectedType
      */
-    public function testFromInstance(object $instance, Type $expectedType): void
+    public function testFromInstance($instance, Type $expectedType): void
     {
         $this->assertSame($expectedType, ClassType::fromInstance($instance));
     }
@@ -91,12 +91,12 @@ class ClassTypeTest extends TestCase
         $this->assertEquals(Type::of(ClassThatCallsFromCaller::class), ClassThatCallsFromCaller::getType());
     }
 
-    private function getAnonymousClassInstance(): object
+    private function getAnonymousClassInstance()
     {
         return new class() {};
     }
 
-    private function getAnonymousClassWithStaticMethodInstance(): object
+    private function getAnonymousClassWithStaticMethodInstance()
     {
         return new class() {
             public static function staticMethod($argument)

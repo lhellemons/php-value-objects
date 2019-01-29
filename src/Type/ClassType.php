@@ -28,7 +28,12 @@ final class ClassType extends Type
         return static::getInstance($classString, Kind::CLASS());
     }
 
-    public static function fromInstance(object $instance): self
+    /**
+     * @param object $instance
+     *
+     * @return ClassType
+     */
+    public static function fromInstance($instance): self
     {
         return self::fromFullyQualifiedClassName(\get_class($instance));
     }
