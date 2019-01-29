@@ -17,15 +17,15 @@ trait SingleValueObjectTrait /* implements SingleValueObjectInterface */
     /** @var string */
     private $value;
 
-    final protected function __construct($value)
+    final protected function __construct($rawValue)
     {
-        self::assertValidValue($value);
-        $this->value = self::normalizeValue($value);
+        self::validateRawValue($rawValue);
+        $this->value = self::normalizeValidRawValue($rawValue);
     }
 
-    final public static function of($value): self
+    final public static function of($rawValue): self
     {
-        return self::getInstance($value);
+        return self::getInstance($rawValue);
     }
 
     final public function getValue()
@@ -41,25 +41,27 @@ trait SingleValueObjectTrait /* implements SingleValueObjectInterface */
     /**
      * Normalizes the value string.
      * Override this method to provide specific normalization for your class
-     * @param string|int|float|bool $value The value to normalize
+     *
+     * @param string|int|float|bool $validRawValue The value to normalize
      *
      * @return string|int|float|bool The normalized value
      */
-    protected static function normalizeValue($value)
+    protected static function normalizeValidRawValue($validRawValue)
     {
-        return $value;
+        return $validRawValue;
     }
 
     /**
      * Validates the given value.
      * Override this method to provide specific validation for your class.
      * Throw a DomainException to indicate that the value is invalid.
-     * If the value is valid, no action is necessary.
+     * If the value is valid, simply return without throwing.
      *
-     * @param string|int|float|bool $value
+     * @param string|int|float|bool $rawValue
+     *
      * @throws \DomainException If the value is invalid
      */
-    protected static function assertValidValue($value): void
+    protected static function validateRawValue($rawValue): void
     {
     }
 }

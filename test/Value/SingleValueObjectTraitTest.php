@@ -62,7 +62,7 @@ class SingleValueObjectTraitTest extends TestCase
             'simple' => [SimpleSingleValueObject::of('foo'), 'foo'],
             'normalized' => [NormalizationSingleValueObject::of(' FOO '), 'foo'],
             'validated (valid)' => [ValidationSingleValueObject::of('valid'), 'valid'],
-            'inherited' => [SingleValueObjectSubclass::of('valid'), 'valid'],
+            'inherited' => [SingleValueObjectSubclass::of('value'), 'value'],
         ];
     }
 }
@@ -76,9 +76,9 @@ class ValidationSingleValueObject implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
-    protected static function assertValidValue($value): void
+    protected static function validateRawValue($rawValue): void
     {
-        if ($value === 'invalid') {
+        if ($rawValue === 'invalid') {
             throw new \DomainException('Invalid!');
         }
     }
@@ -88,9 +88,9 @@ class NormalizationSingleValueObject implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
-    protected static function normalizeValue(string $value): string
+    protected static function normalizeValidRawValue(string $validRawValue): string
     {
-        return strtolower(trim($value));
+        return strtolower(trim($validRawValue));
     }
 }
 

@@ -22,11 +22,11 @@ namespace SolidPhp\ValueObjects\Value;
 interface SingleValueObjectInterface
 {
     /**
-     * @param string|int|float|bool $value
+     * @param string|int|float|bool $rawValue
      *
      * @return self
      */
-    public static function of($value);
+    public static function of($rawValue);
 
     /**
      * @return string|int|float|bool

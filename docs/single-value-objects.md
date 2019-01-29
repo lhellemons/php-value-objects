@@ -34,7 +34,7 @@ Validation
 ----------
 
 In most cases, you won't want to accept just any scalar value. In that
-case, you can override the `validateValue` method from `SingleValueObjectTrait` and
+case, you can override the `validateRawValue` method from `SingleValueObjectTrait` and
 add any validation you might need:
 
 ```php
@@ -42,36 +42,41 @@ class Email implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
-    protected static function validateValue($value): void
+    protected static function validateRawValue($rawValue): void
     {
-        if (0 === preg_match('/\w+\@\w.com/', $value) {
+        if (0 === preg_match('/\w+\@\w.com/', $rawValue) {
             throw new DomainException('Not a valid e-mail address');
         }
     }
 }
 ```
 
-`validateValue` should do nothing if the value is valid, and throw
+`validateRawValue` should do nothing if the value is valid, and throw
 a `DomainException` if the value is not valid in some way.
+
+The argument to `validateRawValue` is the raw value, before it has been
+normalized.
 
 Normalization
 -------------
 
 You might also want to normalize the value before creating the value
 object, for example to trim any whitespace. For this, you can
-override the `normalizeValue` method from `SingleValueObjectTrait`:
+override the `normalizeValidRawValue` method from `SingleValueObjectTrait`:
 
 ```php
 class LastName implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
-    protected static function normalizeValue($value)
+    protected static function normalizeValidRawValue($validRawValue)
     {
-        return trim($value);
+        return trim($validRawValue);
     }
 }
 ```
+
+`normalizeValidRawValue` is called after validation, so
 
 Considerations
 --------------
