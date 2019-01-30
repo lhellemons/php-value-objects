@@ -22,41 +22,61 @@ Then, use the classes or traits in your own designs.
 
 use SolidPhp\ValueObjects\Enum\EnumTrait;
 
-final class MyEnum
+final class Weekday
 {
     use EnumTrait;
 
-    public static function FOO(): self
+    public static function MONDAY(): self
     {
-        return self::define('FOO');
+        return self::define('MONDAY');
     }
+
+    public static function TUESDAY(): self
+    {
+        return self::define('TUESDAY');
+    }
+
+    ...
 }
+...
+$monday = Weekday::MONDAY();
+$tuesday = Weekday::TUESDAY();
+$deliveryDay = WeekDay::MONDAY();
+
+$monday === $deliveryDay; // true
+$monday === $tuesday; // false
 ```
 
 ```php
 
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
 
-final class MyValueObject
+final class EmailAddress
 {
     use ValueObjectTrait;
 
     /** @var string */
-    private $slug;
+    private $emailAddressString;
 
-    private function __construct(string $slug)
+    private function __construct(string $emailAddressString)
     {
-        $this->slug = $slug;
+        $this->emailAddressString = $emailAddressString;
     }
 
-    public function fromSlug(string $slug): self
+    public function of(string $emailAddressString): self
     {
-        return static::getInstance(strtolower(trim($slug)));
+        $normalizedString = strtolower(trim($emailAddressString));
+        return static::getInstance($normalizedString);
     }
 
-    public function getSlug(): string
+    public function getString(): string
     {
-        return $this->slug;
+        return $this->emailAddressString;
     }
 }
+...
+$emailAddress = EmailAddress::of("annie@email.com");
+$sameEmailAddress = EmailAddress::of(" ANNIE@EMAIL.COM");
+
+$emailAddress === $sameEmailAddress; // true
 ```

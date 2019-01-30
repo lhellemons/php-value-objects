@@ -9,9 +9,9 @@ You can convert a class to an Enum in two ways:
 
 You can then add static factory methods to your Enum to define your instances.
 
-Afterwards, you can use these instance methods or the `::instance` or `instances` method to get the instances.
-The EnumTrait guarantees that each instance method always returns the same instance, so you can use
-strict equality.
+Afterwards, you can use these factory methods or the `::instance` or `::instances` methods to get the instances.
+The EnumTrait guarantees that each factory method always returns the same instance, so you can use
+strict equality (===) comparison.
 
 ```php
 class FooBarEnum implements EnumInterface
@@ -29,7 +29,7 @@ class FooBarEnum implements EnumInterface
     }
 }
 
-FooBarEnum::FOO() === FooBarEnum::FOO() // evaluates to true
+FooBarEnum::FOO() === FooBarEnum::FOO() // true
 ```
 
 If you want to store extra data on your Enum instances, you can add a constructor function.
@@ -62,7 +62,7 @@ class FooBarEnum implements EnumInterface
 
     public static function BAR(): self
     {
-        return self::define('BAR', 'bar be queue');
+        return self::define('BAR', 'bar be queued');
     }
 }
 
