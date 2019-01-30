@@ -37,9 +37,12 @@ class SingleValueObjectTraitTest extends TestCase
 
             'normalized' => [ClassType::of(NormalizationSingleValueObject::class), ' FOO ', 'foo'],
             'normalized (type juggle)' => [ClassType::of(NormalizationSingleValueObject::class), 5, '5'],
+            'normalized inherited' => [ClassType::of(NormalizationSingleValueObjectSubclass::class), ' FOO ', 'foo-normalizedBySubclass'],
 
             'validated (valid)' => [ClassType::of(ValidationSingleValueObject::class), 'valid', 'valid'],
             'validated (invalid)' => [ClassType::of(ValidationSingleValueObject::class), 'invalid', null],
+            'validated inherited (invalid in parent)' => [ClassType::of(ValidationSingleValueObjectSubclass::class), 'invalid', null],
+            'validated inherited (invalid in child)' => [ClassType::of(ValidationSingleValueObjectSubclass::class), 'invalidInSubclass', null],
 
             'inherited' => [ClassType::of(SingleValueObjectSubclass::class), 'value', 'value'],
         ];
@@ -96,4 +99,44 @@ class NormalizationSingleValueObject implements SingleValueObjectInterface
 
 class SingleValueObjectSubclass extends SingleValueObject
 {
+}
+
+class ValidationSingleValueObjectSubclass extends ValidationSingleValueObject
+{
+    protected static function validateRawValue($rawValue): void
+    {
+        parent::validateRawValue($rawValue);
+
+        if ($rawValue === 'invalidInSubclass') {
+            throw new \DomainException('Invalid!');
+        }
+    }
+}
+
+class NormalizationSingleValueObjectSubclass extends NormalizationSingleValueObject
+{
+    protected static function normalizeValidRawValue(string $validRawValue): string
+    {
+        return parent::normalizeValidRawValue($validRawValue) . '-normalizedBySubclass';
+    }
+
+}
+
+class ValidationSingleValueObjectNormalizationSubclass extends ValidationSingleValueObject
+{
+    protected static function normalizeValidRawValue($validRawValue)
+    {
+        return parent::normalizeValidRawValue($validRawValue) . '-normalizedBySubclass';
+    }
+}
+
+
+class NormalizationSingleValueObjectValidationSubclass extends NormalizationSingleValueObject
+{
+    protected static function validateRawValue($rawValue): void
+    {
+        if ($rawValue === 'invalidInSubclass') {
+            throw new \DomainException('Invalid!');
+        }
+    }
 }

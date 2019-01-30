@@ -19,8 +19,8 @@ trait SingleValueObjectTrait /* implements SingleValueObjectInterface */
 
     final protected function __construct($rawValue)
     {
-        self::validateRawValue($rawValue);
-        $this->value = self::normalizeValidRawValue($rawValue);
+        static::validateRawValue($rawValue);
+        $this->value = static::normalizeValidRawValue($rawValue);
     }
 
     final public static function of($rawValue): self
