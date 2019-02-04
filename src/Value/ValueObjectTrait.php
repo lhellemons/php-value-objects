@@ -3,6 +3,8 @@
 
 namespace SolidPhp\ValueObjects\Value;
 
+use SolidPhp\ValueObjects\Type\ClassType;
+
 /**
  * Trait ValueObjectTrait
  *
@@ -24,7 +26,7 @@ trait ValueObjectTrait
 
     protected function __construct(...$arguments)
     {
-        throw new \LogicException(sprintf('Class %s uses ValueObjectTrait but does not define a private or protected constructor.', static::class));
+        throw new ValueObjectException(sprintf('Class %s uses ValueObjectTrait but does not define a private or protected constructor.', static::class));
     }
 
     final protected static function getInstance(...$values): self
@@ -32,6 +34,36 @@ trait ValueObjectTrait
         $key = calculateKey(static::class, ...$values);
 
         return self::$instances[$key] = self::$instances[$key] ?? new static(...$values);
+    }
+
+    public function __get($name)
+    {
+        throw new ValueObjectException(sprintf('%s is a value object class, its properties cannot be gotten directly', static::class));
+    }
+
+    public function __isset($name)
+    {
+        throw new ValueObjectException(sprintf('%s is a value object class, its properties cannot be inspected.', static::class));
+    }
+
+    final public function __set($name, $value)
+    {
+        throw ValueObjectException::cannotMutate(ClassType::of(static::class));
+    }
+
+    final public function __wakeup()
+    {
+        throw ValueObjectException::cannotUnserialize(ClassType::of(static::class));
+    }
+
+    final public static function __set_state($an_array)
+    {
+        throw ValueObjectException::cannotUnserialize(ClassType::of(static::class));
+    }
+
+    final public function __clone()
+    {
+        throw ValueObjectException::cannotClone(ClassType::of(static::class));
     }
 }
 

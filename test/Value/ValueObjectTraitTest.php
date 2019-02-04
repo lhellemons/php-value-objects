@@ -2,6 +2,7 @@
 
 namespace Test\SolidPhp\ValueObjects\Value;
 
+use SolidPhp\ValueObjects\Value\ValueObjectException;
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -60,6 +61,60 @@ class ValueObjectTraitTest extends TestCase
     {
         $this->expectException(\LogicException::class);
         NoConstructorType::fromFoo('foo');
+    }
+
+    public function testNoMutation(): void
+    {
+        $testObject = FromValuesType::fromFooAndBar('foo', 1);
+
+        try {
+            $var = $testObject->foo;
+            $this->fail('Able to get a private property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $var = $testObject->nonExistentProperty;
+            $this->fail('Able to get a non-existent property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $var = isset($testObject->foo);
+            $this->fail('Able to query existence of a private property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $var = isset($testObject->nonExistentProperty);
+            $this->fail('Able to query existence of a private property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $testObject->foo = 'newValue';
+            $this->fail('Able to set a private property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $testObject->nonExistentProperty = 'newValue';
+            $this->fail('Able to set a new property on value object type');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $clonedTestObject = clone $testObject;
+            $this->fail('Able to clone a value object');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $serializedTestObject = serialize($testObject);
+            $unserializedTestObject = unserialize($serializedTestObject);
+            $this->fail('Able to unserialize a value object');
+        } catch (ValueObjectException $e) {}
+
+        try {
+            $exportedTestObject = var_export($testObject, true);
+            $unserializedTestObject = eval($exportedTestObject . ';');
+            $this->fail('Able to import a var_exported value object');
+        } catch (ValueObjectException $e) {}
+
+        $this->expectNotToPerformAssertions();
     }
 }
 
