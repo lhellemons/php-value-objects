@@ -16,3 +16,4 @@ Contents
 - [Types](types.md)
 - [Examples](examples)
   - [Money pattern](examples/money.md)
+  - [Date object](examples/date.md)
