@@ -1,7 +1,8 @@
 {
   "name": "lhellemons/php-value-objects",
-  "version": "0.1",
-  "description": "Utility classes, traits and interfaces for implementing true PHP value objects",
+  "version": "1.0.0-alpha.3",
+  "description": "Classes, traits and interfaces for implementing true PHP value objects",
+  "keywords": ["PHP", "value", "value object", "value objects", "enum"],
   "type": "library",
   "license": "MIT",
   "authors": [
