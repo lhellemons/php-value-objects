@@ -14,6 +14,9 @@ The EnumTrait guarantees that each factory method always returns the same instan
 strict equality (===) comparison.
 
 ```php
+use SolidPhp\ValueObjects\Enum\EnumInterface;
+use SolidPhp\ValueObjects\Enum\EnumTrait;
+
 class FooBarEnum implements EnumInterface
 {
     use EnumTrait;
@@ -32,12 +35,15 @@ class FooBarEnum implements EnumInterface
 FooBarEnum::FOO() === FooBarEnum::FOO() // true
 ```
 
-If you want to store extra data on your Enum instances, you can add a constructor function.
-The constructor will be passed the id and any extra arguments passed to the `define` calls by
-your factory methods; you can use them just as in normal classes.
-
+If you want to store extra data on your Enum instances, you can add a
+constructor function. The constructor will be passed the id and any
+extra arguments passed to the `define` calls by your factory methods;
+you can use them just as in normal classes.
 
 ```php
+use SolidPhp\ValueObjects\Enum\EnumInterface;
+use SolidPhp\ValueObjects\Enum\EnumTrait;
+
 class FooBarEnum implements EnumInterface
 {
     use EnumTrait;
@@ -45,9 +51,9 @@ class FooBarEnum implements EnumInterface
     /** @var string */
     private $message;
 
-    protected function __construct(string $id, string $message): void
+    protected function __construct(string $id, string $message)
     {
-        $this-message = $message;
+        $this->message = $message;
     }
 
     public function getMessage(): string
@@ -69,12 +75,13 @@ class FooBarEnum implements EnumInterface
 echo FooBarEnum::FOO()->getMessage(); // outputs 'foo mama'
 ```
 
-The Enum classes can have subclasses as well, but the following caveats apply:
-- although the factory methods are inherited from the parent Enum, these still
-  produce instances of the class on which they are called, so Parent::FOO() _will not be
-  equal to_ Child::FOO().
-- If the parent class defines factory methods that are not overridden by the child class,
-  and the child has its own constructor, the constructor must accept at least the same
-  parameters as the parent constructor, and any extra parameters not accepted by the parent
-  constructor must be optional, so that the data from the parent factory methods can be
+Enum classes can have subclasses as well, but the following caveats apply:
+- although the factory methods are inherited from the parent Enum, these
+ still produce instances of the class on which they are called, so
+ `Parent::FOO()` _will not be equal to_ `Child::FOO()`.
+- If the parent class defines factory methods that are not overridden by
+ the child class, and the child has its own constructor, the constructor
+  must accept _at least the same parameters_ as the parent constructor,
+  and any extra parameters not accepted by the parent constructor _must
+  be optional_, so that the data from the parent factory methods can be
   accepted by the child constructor.
