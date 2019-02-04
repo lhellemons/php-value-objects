@@ -6,6 +6,10 @@ Martin Fowler (https://martinfowler.com/eaaCatalog/money.html).
 Here is a sample implementation using a ValueObject:
 
 ```php
+use SolidPhp\ValueObjects\Enum\EnumInterface;
+use SolidPhp\ValueObjects\Enum\EnumTrait;
+use SolidPhp\ValueObjects\Value\ValueObjectTrait;
+
 class Currency implements EnumInterface
 {
     use EnumTrait;
@@ -83,10 +87,10 @@ final class Money
 
         $share = $this->multiply(1 / $count);
         $shares = array_fill(0, $count, $share);
-        $remainder = $this->subtract($share->multiply($count), $result);
-        $results[$count-1] = $results[$count-1]->add($remainder);
+        $remainder = $this->subtract($share->multiply($count));
+        $shares[$count-1] = $shares[$count-1]->add($remainder);
 
-        return $results;
+        return $shares;
     }
     
     private function assertSameCurrency(Money $money): void

@@ -116,7 +116,124 @@ class ValueObjectTraitTest extends TestCase
 
         $this->expectNotToPerformAssertions();
     }
+
+    /**
+     * @dataProvider getCasesForValueTypes
+     * @param      $firstValue
+     * @param      $secondValue
+     * @param bool $expectedSame
+     */
+    public function testValueTypes($firstValue, $secondValue, bool $expectedSame): void
+    {
+        $instanceA = ValueTypesType::of($firstValue);
+        $instanceB = ValueTypesType::of($secondValue);
+
+        if ($expectedSame) {
+            $this->assertSame($instanceA, $instanceB);
+        } else {
+            $this->assertNotSame($instanceA, $instanceB);
+        }
+    }
+
+    public function getCasesForValueTypes(): array
+    {
+        $stdClassA = new \stdClass();
+        $stdClassA->foo = 'foo';
+        $stdClassB = new \stdClass();
+        $stdClassB->foo = 'bar';
+
+        $objectA = new Object();
+        $objectB = new Object();
+
+        $resourceA = fopen(__DIR__ . '/test_resource', 'r');
+        $resourceB = fopen(__DIR__ . '/test_resource', 'r');
+
+        return [
+            'boolean - equal' => [true, true, true],
+            'boolean - not equal' => [true, false, false],
+            'int - equal' => [1,1,true],
+            'int - not equal' => [1,2,false],
+            'float - equal' => [1.0, 1.0, true],
+            'float - not equal' => [1.0, 1.1, false],
+            'string - equal' => ['foo', 'foo', true],
+            'string - not equal' => ['foo', 'bar', false],
+            'array - empty equal' => [[], [], true],
+            'array - equal values' => [['a'],['a'], true],
+            'array - different values' => [['a'],['b'], false],
+            'array - different keys' => [[1 => 'a'],[2 => 'a'], false],
+
+            'stdClass - same instance' => [$stdClassA, $stdClassA, true],
+            'stdClass - different instances' => [$stdClassA, $stdClassB, false],
+            'stdClass - different literals' => [new \stdClass(), new \stdClass(), true],
+
+            'object - same instance' => [$objectA, $objectA, true],
+            'object - different instance' => [$objectA, $objectB, false],
+
+            'resource - same instance' => [$resourceA, $resourceA, true],
+            'resource - different instance' => [$resourceA, $resourceB, false],
+
+            'boolean / int' => [true, 1, false],
+            'boolean / float' => [true, 1.0, false],
+            'boolean / string' => [true, '1', false],
+            'boolean / array' => [true, [1], false],
+            'boolean / resource' => [true, $resourceA, false],
+            'boolean / object' => [true, $objectA, false],
+            'boolean / stdClass' => [true, new \stdClass(), false],
+
+            'int / float' => [1, 1.0, false],
+            'int / string' => [1, '1', false],
+            'int / array' => [1, [1], false],
+            'int / resource' => [1, $resourceA, false],
+            'int / object' => [1, $objectA, false],
+            'int / stdClass' => [1, new \stdClass(), false],
+
+            'float / string' => [1.0, '1.0', false],
+            'float / array' => [1.0, [1.0], false],
+            'float / resource' => [1.0, $resourceA, false],
+            'float / object' => [1.0, $objectA, false],
+            'float / stdClass' => [1.0, new \stdClass(), false],
+
+            'string / array' => ['foo', ['foo'], false],
+            'string / resource' => ['foo', $resourceA, false],
+            'string / object' => ['foo', $objectA, false],
+            'string / stdClass' => ['foo', new \stdClass(), false],
+
+            'array / resource' => [[1], $resourceA, false],
+            'array / object' => [[1], $objectA, false],
+
+            'resource / object' => [$resourceA, $objectA, false],
+            'resource / stdClass' => [$resourceA, $stdClassA, false],
+
+            'array / empty stdClass' => [[], new \stdClass(), true],
+            'array / non-empty stdClass' => [['foo'], (object)['foo'], true],
+            'array / different non-empty stdClass' => [['foo'], (object)['bar'], false],
+        ];
+    }
 }
+
+class ValueTypesType
+{
+    use ValueObjectTrait;
+
+    private $value;
+
+    private function __construct($value)
+    {
+        $this->value = $value;
+    }
+
+    public static function of($value): self
+    {
+        return self::getInstance($value);
+    }
+
+    public function getValue()
+    {
+        return $this->value;
+    }
+}
+
+class Object {}
 
 class FromValuesType
 {

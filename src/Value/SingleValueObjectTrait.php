@@ -14,20 +14,24 @@ trait SingleValueObjectTrait /* implements SingleValueObjectInterface */
 {
     use ValueObjectTrait;
 
-    /** @var string */
+    /** @var string|int|float|bool */
     private $value;
 
-    final protected function __construct($rawValue)
+    final protected function __construct($value)
     {
-        static::validateRawValue($rawValue);
-        $this->value = static::normalizeValidRawValue($rawValue);
+        $this->value = $value;
     }
 
     final public static function of($rawValue): self
     {
-        return self::getInstance($rawValue);
+        static::validateRawValue($rawValue);
+
+        return self::getInstance(static::normalizeValidRawValue($rawValue));
     }
 
+    /**
+     * @return bool|float|int|string
+     */
     final public function getValue()
     {
         return $this->value;

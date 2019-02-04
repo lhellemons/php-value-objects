@@ -26,6 +26,8 @@ their parameters, and then call `return static::getInstance()` with the paramete
 
 Example:
 ```php
+use SolidPhp\ValueObjects\Value\ValueObjectTrait;
+
 class Point
 {
     // use ValueObjectTrait to get access to the getInstance class method to use in your factory methods
@@ -86,12 +88,14 @@ $myPoint === $myOtherPoint; // false
 Important things to remember
 ----------------------------
 
-Value objects add many advantages to your codebase, but these come with the following caveats:
+Value objects add many advantages to your codebase. These flow directly
+from the following usage rules:
 
 - Never mutate the value of your instance properties! You can add non-static factory methods that
   use `static::getInstance` to construct a new instance based on the current instance.
-  This also means no setter methods! Check out the [money example](examples/money.md).
-- Don't directly `unserialize` a value object; this will always create a new instance. Value objects
+  This also means no setter methods! Check out the [money example](examples/money.md) for an example of how to work with immutable
+  value object instances.
+- Value objects cannot directly be `unserialize`d; this would always create a new instance. Value objects
   usually contain only scalars as properties, so serialization / unserialization should be a matter
   of getting those scalars for serialization and using the unserialized scalars to produce the correct
   call to a factory method for deserialization. In the future this library may add a trait that will
@@ -108,3 +112,17 @@ $entity->property = 2;
 $valueObjectB = ValueClass::fromEntity($entity);
 $valueObjectA === $valueObjectB; // true
 ```
+
+WeakRef
+-------
+
+Value objects support the PHP [WeakRef extension](http://php.net/manual/en/book.weakref.php). 
+If your PHP runtime has the WeakRef extension installed, value object
+ instances will be kept as weak references, and will be 
+ garbage-collected
+ when they are no longer referenced in code. This means it becomes
+ possible to instantiate enormous numbers of value objects for
+ quick tasks without consuming excessive memory.
+
+If the WeakRef extension is not installed, value object instances will
+be kept in memory until the script finishes.

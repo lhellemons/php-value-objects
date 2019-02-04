@@ -11,6 +11,8 @@ Read the full documentation [here](docs/index.md).
 Usage
 -----
 
+Install the package using composer.
+
 ```
 composer require lhellemons/php-value-objects
 ```
@@ -36,9 +38,11 @@ final class Weekday
         return self::define('TUESDAY');
     }
 
-    ...
+    // ...
 }
-...
+
+// ...
+
 $monday = Weekday::MONDAY();
 $tuesday = Weekday::TUESDAY();
 $deliveryDay = WeekDay::MONDAY();
@@ -74,7 +78,9 @@ final class EmailAddress
         return $this->emailAddressString;
     }
 }
-...
+
+// ...
+
 $emailAddress = EmailAddress::of("annie@email.com");
 $sameEmailAddress = EmailAddress::of(" ANNIE@EMAIL.COM");
 

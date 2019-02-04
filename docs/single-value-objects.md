@@ -15,17 +15,22 @@ The `SingleValueObjectTrait` implements these methods for you, so in
 most cases you can just define your class like this and it will work:
 
 ```php
-class MySimpleValueObject implements SingleValueObjectInterface
+use SolidPhp\ValueObjects\Value\SingleValueObjectInterface;
+use SolidPhp\ValueObjects\Value\SingleValueObjectTrait;
+
+class EmailAddress implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 }
 ```
 
-or extend the `SimpleValueObject` abstract class, which is provided for
+or extend the `SingleValueObject` abstract class, which is provided for
 convenience and is basically just a shorthand for the above code block:
 
 ```php
-class MySimpleValueObject extends SimpleValueObject
+use SolidPhp\ValueObjects\Value\SingleValueObject;
+
+class EmailAddress extends SingleValueObject
 {
 }
 ```
@@ -38,13 +43,16 @@ case, you can override the `validateRawValue` method from `SingleValueObjectTrai
 add any validation you might need:
 
 ```php
-class Email implements SingleValueObjectInterface
+use SolidPhp\ValueObjects\Value\SingleValueObjectInterface;
+use SolidPhp\ValueObjects\Value\SingleValueObjectTrait;
+
+class EmailAddress implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
     protected static function validateRawValue($rawValue): void
     {
-        if (0 === preg_match('/\w+\@\w.com/', $rawValue) {
+        if (0 === preg_match('/\w+\@\w.com/', $rawValue)) {
             throw new DomainException('Not a valid e-mail address');
         }
     }
@@ -65,18 +73,22 @@ object, for example to trim any whitespace. For this, you can
 override the `normalizeValidRawValue` method from `SingleValueObjectTrait`:
 
 ```php
-class LastName implements SingleValueObjectInterface
+use SolidPhp\ValueObjects\Value\SingleValueObjectInterface;
+use SolidPhp\ValueObjects\Value\SingleValueObjectTrait;
+
+class EmailAddress implements SingleValueObjectInterface
 {
     use SingleValueObjectTrait;
 
-    protected static function normalizeValidRawValue($validRawValue)
+    protected static function normalizeValidRawValue($validRawValue): string 
     {
         return trim($validRawValue);
     }
 }
 ```
 
-`normalizeValidRawValue` is called after validation, so
+`normalizeValidRawValue` is called after validation, so you can assume
+the parameter is valid according to the rules of your class.
 
 Considerations
 --------------
@@ -86,4 +98,3 @@ value object also apply here.
 
 - Don't mutate instance properties
 - Don't deserialize directly; always use the `of` factory method
-- Use only scalar values; no objects or arrays.

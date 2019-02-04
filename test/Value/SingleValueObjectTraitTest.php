@@ -49,6 +49,46 @@ class SingleValueObjectTraitTest extends TestCase
     }
 
     /**
+     * @dataProvider getCasesForSame
+     * @param      $valueObjectA
+     * @param      $valueObjectB
+     * @param bool $expectedSame
+     */
+    public function testSame($valueObjectA, $valueObjectB, bool $expectedSame): void
+    {
+        if ($expectedSame) {
+            $this->assertSame($valueObjectA, $valueObjectB);
+            } else {
+            $this->assertNotSame($valueObjectA, $valueObjectB);
+        }
+    }
+
+    public function getCasesForSame(): array
+    {
+        return [
+            'simple (string) - equal' => [SimpleSingleValueObject::of('foo'), SimpleSingleValueObject::of('foo'), true],
+            'simple (string) - not equal' => [SimpleSingleValueObject::of('foo'), SimpleSingleValueObject::of('bar'), false],
+
+            'simple (int) - equal' => [SimpleSingleValueObject::of(1), SimpleSingleValueObject::of(1), true],
+            'simple (int) - not equal' => [SimpleSingleValueObject::of(1), SimpleSingleValueObject::of(2), false],
+
+            'simple (float) - equal' => [SimpleSingleValueObject::of(1.0), SimpleSingleValueObject::of(1.0), true],
+            'simple (float) - not equal' => [SimpleSingleValueObject::of(1), SimpleSingleValueObject::of(1.1), false],
+
+            'simple (bool) - equal' => [SimpleSingleValueObject::of(true), SimpleSingleValueObject::of(true), true],
+            'simple (bool) - not equal' => [SimpleSingleValueObject::of(true), SimpleSingleValueObject::of(false), false],
+
+            'array - equal' => [SimpleSingleValueObject::of(['foo']), SimpleSingleValueObject::of(['foo']), true],
+            'array - different values' => [SimpleSingleValueObject::of(['foo']), SimpleSingleValueObject::of(['bar']), false],
+            'array - different keys' => [SimpleSingleValueObject::of([1 => 'foo']), SimpleSingleValueObject::of([2 => 'foo']), false],
+            'array - different length' => [SimpleSingleValueObject::of(['foo']), SimpleSingleValueObject::of(['foo', 'bar']), false],
+
+            'normalized - equal' => [NormalizationSingleValueObject::of('foo'), NormalizationSingleValueObject::of(' FOO '), true],
+            'normalized - not equal' => [NormalizationSingleValueObject::of('foo'), NormalizationSingleValueObject::of('bar'), false],
+        ];
+    }
+
+    /**
      * @dataProvider getCasesForGetValue
      *
      * @param SingleValueObjectInterface $singleValueObject

@@ -1,9 +1,9 @@
 <?php
 
-
 namespace SolidPhp\ValueObjects\Value;
 
 use SolidPhp\ValueObjects\Type\ClassType;
+use SolidPhp\ValueObjects\Value\Ref\Ref;
 
 /**
  * Trait ValueObjectTrait
@@ -21,29 +21,46 @@ use SolidPhp\ValueObjects\Type\ClassType;
  */
 trait ValueObjectTrait
 {
-    /** @var self[] */
+    /** @var Ref[] */
     static private $instances = [];
 
     protected function __construct(...$arguments)
     {
-        throw new ValueObjectException(sprintf('Class %s uses ValueObjectTrait but does not define a private or protected constructor.', static::class));
+        throw new ValueObjectException(
+            sprintf(
+                'Class %s uses ValueObjectTrait but does not define a private or protected constructor.',
+                static::class
+            )
+        );
     }
 
     final protected static function getInstance(...$values): self
     {
         $key = calculateKey(static::class, ...$values);
 
-        return self::$instances[$key] = self::$instances[$key] ?? new static(...$values);
+        $ref = self::$instances[$key] = self::$instances[$key] ?? Ref::create();
+        if ($ref->has()) {
+            return $ref->get();
+        }
+
+        $instance = new static(...$values);
+        $ref->set($instance);
+
+        return $instance;
     }
 
     public function __get($name)
     {
-        throw new ValueObjectException(sprintf('%s is a value object class, its properties cannot be gotten directly', static::class));
+        throw new ValueObjectException(
+            sprintf('%s is a value object class, its properties cannot be gotten directly', static::class)
+        );
     }
 
     public function __isset($name)
     {
-        throw new ValueObjectException(sprintf('%s is a value object class, its properties cannot be inspected.', static::class));
+        throw new ValueObjectException(
+            sprintf('%s is a value object class, its properties cannot be inspected.', static::class)
+        );
     }
 
     final public function __set($name, $value)
@@ -67,7 +84,6 @@ trait ValueObjectTrait
     }
 }
 
-
 function calculateKey(...$values): string
 {
     if (\count($values) === 0) {
@@ -75,7 +91,7 @@ function calculateKey(...$values): string
     }
 
     if (\count($values) > 1) {
-        return implode('|', array_map('SolidPhp\ValueObjects\Value\calculateKey',$values));
+        return implode('|', array_map('SolidPhp\ValueObjects\Value\calculateKey', $values));
     }
 
     [$value] = $values;
@@ -93,7 +109,8 @@ function calculateKey(...$values): string
     }
 
     if (\is_resource($value)) {
-        throw new \InvalidArgumentException('Value object cannot be constructed based on a resource');
+        // note: this works because PHP stringifies resources as 'resource id #x' and never reuses x during a script run
+        return 'resource:' . $value;
     }
 
     return sprintf('scalar<%s>:%s', \gettype($value), $value);
