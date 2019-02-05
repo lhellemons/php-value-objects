@@ -57,12 +57,6 @@ class ValueObjectTraitTest extends TestCase
         $this->assertNotSame($subclassB11,$subclassC11);
     }
 
-    public function testNoConstructor(): void
-    {
-        $this->expectException(\LogicException::class);
-        NoConstructorType::fromFoo('foo');
-    }
-
     public function testNoMutation(): void
     {
         $testObject = FromValuesType::fromFooAndBar('foo', 1);
@@ -367,15 +361,5 @@ class SubclassCType extends SuperclassType
     public function getBarC(): int
     {
         return $this->barC;
-    }
-}
-
-class NoConstructorType
-{
-    use ValueObjectTrait;
-
-    public static function fromFoo(string $foo)
-    {
-        return self::getInstance($foo);
     }
 }

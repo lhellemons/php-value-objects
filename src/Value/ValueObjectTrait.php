@@ -24,15 +24,7 @@ trait ValueObjectTrait
     /** @var Ref[] */
     static private $instances = [];
 
-    protected function __construct(...$arguments)
-    {
-        throw new ValueObjectException(
-            sprintf(
-                'Class %s uses ValueObjectTrait but does not define a private or protected constructor.',
-                static::class
-            )
-        );
-    }
+    abstract protected function __construct(...$arguments);
 
     final protected static function getInstance(...$values): self
     {
