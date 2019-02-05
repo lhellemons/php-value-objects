@@ -9,6 +9,24 @@ This library contains utility classes, traits and interfaces for working
 
 Read the full documentation [here](docs/index.md).
 
+Why value objects?
+------------------
+Value objects are a core component of domain-driven design (DDD). They are
+objects that do not have an identity, and are instead defined by their values.
+Any large system that deals with domain concepts will eventually develop
+a need to model some of these concepts as value objects.
+Examples of such concepts include
+
+- Dates
+- Amounts of money
+- Coordinates
+- Adresses
+- Physical quantities such as age, length or weight
+
+This library helps circumvent PHP's limited support for value objects.
+Using the classes, interfaces and traits provided by this package, you can 
+create your own value objects without worrying about the internals.
+
 Usage
 -----
 
