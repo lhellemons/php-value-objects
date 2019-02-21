@@ -10,7 +10,7 @@ namespace SolidPhp\ValueObjects\Enum;
  * After using this Trait, the class can define public static "factory" methods to define its instances.
  *
  * For example, here is a very simple implementation:
- * ```
+ * ```php
  * class FooBarEnum implements EnumInterface
  * {
  *   use EnumTrait;
@@ -72,7 +72,7 @@ trait EnumTrait /* implements EnumInterface */
 {
     private static $instancesById;
 
-    /** @var array */
+    /** @var int[] */
     private static $allInstancesInitialized = [];
 
     /**
@@ -100,13 +100,29 @@ trait EnumTrait /* implements EnumInterface */
     }
 
     /**
+     * This method is called the first time it's needed.
+     * It should call `define` for each instance to be created.
+     *
+     * The default behavior is to call every public factory method in the class, with
+     * the expectation that those methods will call `define`. Override this method to provide
+     * different behavior, for instance loading instances parametrically from an array or file.
+     *
+     * If you override this method, the class must be final, because child classes won't be able
+     * to add instances.
+     */
+    protected static function defineInstances(): void
+    {
+        call_all_public_nullary_factory_methods(static::class);
+    }
+
+    /**
      * @param string $id
      * @param bool $throwIfNotFound
      * @return null|$this
      */
     final public static function instance(string $id, bool $throwIfNotFound = false)
     {
-        static::_ensureAllInstancesInitialized(static::class);
+        static::_ensureAllInstancesInitialized();
 
         if (isset(self::$instancesById[static::class][$id])) {
             return self::$instancesById[static::class][$id];
@@ -124,34 +140,31 @@ trait EnumTrait /* implements EnumInterface */
      */
     final public static function instances(): array
     {
-        static::_ensureAllInstancesInitialized(static::class);
+        static::_ensureAllInstancesInitialized();
 
         return array_values(self::$instancesById[static::class]);
     }
 
     final public function getId(): string
     {
-        static::_ensureAllInstancesInitialized(static::class);
+        static::_ensureAllInstancesInitialized();
 
-        foreach (self::$instancesById[static::class] as $id => $instance) {
-            if ($instance === $this) {
-                return $id;
-            }
-        }
-
-        return null;
+        return array_search($this, self::$instancesById[static::class], true);
     }
 
-    private static function _ensureAllInstancesInitialized(string $class): void
+    private static function _ensureAllInstancesInitialized(): void
     {
-        if (!isset(self::$allInstancesInitialized[$class])) {
-            initialize_all_enum_instances($class);
-            self::$allInstancesInitialized[$class] = true;
+        static $_isInitializing;
+        if (!$_isInitializing && !isset(self::$allInstancesInitialized[static::class])) {
+            $_isInitializing = true;
+            static::defineInstances();
+            $_isInitializing = false;
+            self::$allInstancesInitialized[static::class] = true;
         }
     }
 }
 
-function initialize_all_enum_instances(string $enumClass): void
+function call_all_public_nullary_factory_methods(string $enumClass): void
 {
     try {
         $reflectionClass = new \ReflectionClass($enumClass);
@@ -159,7 +172,7 @@ function initialize_all_enum_instances(string $enumClass): void
         /** @var \ReflectionMethod[] $factoryMethods */
         $factoryMethods = array_filter(
             $reflectionClass->getMethods(),
-            'SolidPhp\ValueObjects\Enum\is_enum_factory_method'
+            'SolidPhp\ValueObjects\Enum\is_public_nullary_factory_method'
         );
         foreach ($factoryMethods as $method) {
             $method->invoke(null);
@@ -169,7 +182,7 @@ function initialize_all_enum_instances(string $enumClass): void
     }
 }
 
-function is_enum_factory_method(\ReflectionMethod $method): bool
+function is_public_nullary_factory_method(\ReflectionMethod $method): bool
 {
     return $method->isPublic()
         && $method->isStatic()

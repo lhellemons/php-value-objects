@@ -49,6 +49,11 @@ class EnumTraitTest extends TestCase
         $this->assertNotSame(TestInheritanceParentEnum::PARENT(), TestInheritanceChildEnum::PARENT());
         $this->assertNotSame(TestInheritanceParentEnum::PARENT(), TestInheritanceChildEnum::PARENT());
     }
+
+    public function testDefineInstances(): void
+    {
+        $this->assertSame(TestCustomDefineInstances::instances(), [TestCustomDefineInstances::instance('FOO'), TestCustomDefineInstances::instance('BAR')]);
+    }
 }
 
 class TestInstancesEnum implements EnumInterface
@@ -183,5 +188,19 @@ class TestInheritanceChildEnum extends TestInheritanceParentEnum
     public function getChildProp()
     {
         return $this->childProp;
+    }
+}
+
+final class TestCustomDefineInstances
+{
+    use EnumTrait;
+
+    public const FOO = 'FOO';
+    public const BAR = 'BAR';
+
+    private static function defineInstances(): void
+    {
+        self::define(self::FOO);
+        self::define(self::BAR);
     }
 }

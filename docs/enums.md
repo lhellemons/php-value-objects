@@ -32,7 +32,7 @@ class FooBarEnum implements EnumInterface
     }
 }
 
-FooBarEnum::FOO() === FooBarEnum::FOO() // true
+FooBarEnum::FOO() === FooBarEnum::FOO(); // true
 ```
 
 If you want to store extra data on your Enum instances, you can add a
@@ -75,6 +75,9 @@ class FooBarEnum implements EnumInterface
 echo FooBarEnum::FOO()->getMessage(); // outputs 'foo mama'
 ```
 
+Subclasses
+----------
+
 Enum classes can have subclasses as well, but the following caveats apply:
 - although the factory methods are inherited from the parent Enum, these
  still produce instances of the class on which they are called, so
@@ -85,3 +88,51 @@ Enum classes can have subclasses as well, but the following caveats apply:
   and any extra parameters not accepted by the parent constructor _must
   be optional_, so that the data from the parent factory methods can be
   accepted by the child constructor.
+
+Bulk definitions
+----------------
+
+Some enum classes may need a large number of instances, or even instances
+depending on some external definition, such as a CSV file. In these 
+cases, it will be tedious or even error-prone to create a separate
+factory method for each of the instances. For these cases, you can
+override the `defineInstances` method of `EnumTrait`. Inside this method
+you can call `define` multiple times to create as many instances as
+you need, like so:
+
+```php
+<?php
+
+use SolidPhp\ValueObjects\Enum\EnumTrait;
+use SolidPhp\ValueObjects\Enum\EnumInterface;
+
+class Country implements EnumInterface
+{
+    use EnumTrait;
+    
+    protected static function defineInstances() : void
+    {
+        // countries.csv:
+        // US;United States of America
+        // NL;Netherlands
+        // UK;United Kingdom
+        // ...
+        $countryDefinitions = explode("\n", file_get_contents(__DIR__ . 'countries.csv'));
+        
+        foreach ($countryDefinitions as $countryDefinition) {
+            [$code, $name] = explode(';', $countryDefinition);
+            self::define($code, $name);
+        }
+    }
+}
+```
+
+If you define your instances like this, the following caveats apply:
+
+- You can no longer use `define` in other methods. Any factory methods
+  you write will need to use `instance` or `instances` to get their
+  instances.
+- Because of this, if the class has any child classes, they also need
+  to override this method and use it to define their instances. As a consequence,
+  they can choose whether or not to include the parent class instances 
+  for themselves by calling or not calling `parent::defineInstances()` there.
