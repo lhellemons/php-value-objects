@@ -57,6 +57,16 @@ class ValueObjectTraitTest extends TestCase
         $this->assertNotSame($subclassB11,$subclassC11);
     }
 
+    public function testInheritanceWithoutParentConstructor(): void
+    {
+        try {
+            SubclassWithConstructorType::fromFoo('1');
+            $this->expectNotToPerformAssertions();
+        } catch (\Throwable $e) {
+            $this->fail(sprintf('Unable to instantiate value object subclass without parent constructor: %s', $e));
+        }
+    }
+
     public function testNoMutation(): void
     {
         $testObject = FromValuesType::fromFooAndBar('foo', 1);
@@ -136,8 +146,8 @@ class ValueObjectTraitTest extends TestCase
         $stdClassB = new \stdClass();
         $stdClassB->foo = 'bar';
 
-        $objectA = new Object();
-        $objectB = new Object();
+        $objectA = new ObjectClass();
+        $objectB = new ObjectClass();
 
         $resourceA = fopen(__DIR__ . '/test_resource', 'r');
         $resourceB = fopen(__DIR__ . '/test_resource', 'r');
@@ -227,7 +237,7 @@ class ValueTypesType
     }
 }
 
-class Object {}
+class ObjectClass {}
 
 class FromValuesType
 {
@@ -361,5 +371,33 @@ class SubclassCType extends SuperclassType
     public function getBarC(): int
     {
         return $this->barC;
+    }
+}
+
+
+
+abstract class SuperclassWithoutConstructorType
+{
+    use ValueObjectTrait;
+}
+
+class SubclassWithConstructorType extends SuperclassWithoutConstructorType
+{
+    /** @var string */
+    private $foo;
+
+    protected function __construct(string $foo)
+    {
+        $this->foo = $foo;
+    }
+
+    public static function fromFoo(string $foo): self
+    {
+        return self::getInstance($foo);
+    }
+
+    public function getFoo(): string
+    {
+        return $this->foo;
     }
 }
