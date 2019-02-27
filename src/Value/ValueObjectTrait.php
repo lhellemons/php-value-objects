@@ -24,8 +24,6 @@ trait ValueObjectTrait
     /** @var Ref[] */
     static private $instances = [];
 
-    abstract protected function __construct(...$arguments);
-
     final protected static function getInstance(...$values): self
     {
         $key = calculateKey(static::class, ...$values);
