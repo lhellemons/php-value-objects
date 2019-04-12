@@ -1,6 +1,8 @@
 PHP Value Objects SDK
 =====================
 
+[![Build Status](https://travis-ci.org/lhellemons/php-value-objects.svg?branch=master)](https://travis-ci.org/lhellemons/php-value-objects)
+
 Author: Laurens Hellemons <lhellemons@gmail.com>
 
 This library contains utility classes, traits and interfaces for working
