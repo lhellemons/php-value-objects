@@ -13,4 +13,4 @@ before-install:
 # Create database, schema and fixtures
 install:
     - composer install
-    - if [ "$USE_WEAKREF" = "true" ]; then pecl install weakref; fi
+    - if [ "$USE_WEAKREF" = "true" ]; then pecl install weakref-beta; fi
