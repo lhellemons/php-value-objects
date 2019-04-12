@@ -1,0 +1,16 @@
+language: php
+php:
+    - 7.1
+    - 7.2
+    - 7.3
+env:
+    - USE_WEAKREF=false
+    - USE_WEAKREF=true
+
+before-install:
+    - composer self-update
+# Install composer dependencies,
+# Create database, schema and fixtures
+install:
+    - composer install
+    - if [ "$USE_WEAKREF" = "true" ]; then pecl install weakref; fi
