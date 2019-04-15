@@ -11,6 +11,9 @@ abstract class Type
     /** @var string */
     protected $name;
 
+    /** @var string|null */
+    protected $shortName;
+
     /** @var Kind */
     protected $kind;
 
@@ -56,6 +59,11 @@ abstract class Type
     public function getFullyQualifiedName(): string
     {
         return $this->name;
+    }
+
+    public function getShortName(): string
+    {
+        return $this->shortName = $this->shortName ?: substr($this->name, strrpos($this->name, '\\') + 1);
     }
 
     public function getKind(): Kind
