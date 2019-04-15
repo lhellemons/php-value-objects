@@ -89,6 +89,12 @@ class TypeTest extends TestCase
         );
     }
 
+    public function testShortName(): void
+    {
+        $this->assertEquals('Type', Type::of(Type::class)->getShortName());
+        $this->assertEquals('Type', Type::of(Type::class)->getShortName());
+    }
+
     /**
      * @dataProvider getCasesForIsSuperTypeOf
      * @param Type $type
