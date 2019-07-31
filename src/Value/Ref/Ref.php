@@ -2,11 +2,16 @@
 
 namespace SolidPhp\ValueObjects\Value\Ref;
 
-define('__SOLIDPHP_VALUEOBJECTS_WEAKREF_AVAILABLE', class_exists('\WeakRef'));
+define('__SOLIDPHP_VALUEOBJECTS_NATIVE_WEAKREF_AVAILABLE', class_exists('\WeakReference'));
+define('__SOLIDPHP_VALUEOBJECTS_PECL_WEAKREF_AVAILABLE', class_exists('\WeakRef'));
 
-if (__SOLIDPHP_VALUEOBJECTS_WEAKREF_AVAILABLE) {
+if (__SOLIDPHP_VALUEOBJECTS_NATIVE_WEAKREF_AVAILABLE) {
     function createRef(): Ref {
-        return new WeakRef();
+        return new NativeWeakRef();
+    }
+} elseif (__SOLIDPHP_VALUEOBJECTS_PECL_WEAKREF_AVAILABLE) {
+    function createRef(): Ref {
+        return new PeclWeakRef();
     }
 } else {
     function createRef(): Ref {
