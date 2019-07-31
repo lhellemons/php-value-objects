@@ -1,16 +1,19 @@
 language: php
 php:
-    - 7.1
-    - 7.2
-    - 7.3
+    - "7.1"
+    - "7.2"
+    - "7.3"
+    - "7.4snapshot"
 env:
-    - USE_WEAKREF=false
-    - USE_WEAKREF=true
+    - WITH_PECL_WEAKREF=false
+    - WITH_PECL_WEAKREF=true
 
 matrix:
-    allow_failures:
-        - php: 7.3
-          env: USE_WEAKREF=true
+    exclude:
+        - php: "7.3"
+          env: WITH_PECL_WEAKREF=true
+        - php: "7.4snapshot"
+          env: WITH_PECL_WEAKREF=true
 
 before-install:
     - composer self-update
@@ -18,4 +21,4 @@ before-install:
 # Create database, schema and fixtures
 install:
     - composer install
-    - if [ "$USE_WEAKREF" = "true" ]; then pecl install weakref-beta; fi
+    - if [ "$WITH_PECL_WEAKREF" = "true" ]; then pecl install weakref-beta; fi

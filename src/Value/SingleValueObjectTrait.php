@@ -22,6 +22,10 @@ trait SingleValueObjectTrait /* implements SingleValueObjectInterface */
         $this->value = $value;
     }
 
+    /**
+     * @param mixed $rawValue
+     * @return static
+     */
     final public static function of($rawValue): self
     {
         static::validateRawValue($rawValue);
