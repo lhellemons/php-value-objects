@@ -213,6 +213,42 @@ class ValueObjectTraitTest extends TestCase
             'array / different non-empty stdClass' => [['foo'], (object)['bar'], false],
         ];
     }
+
+    /**
+     * @param       $instance
+     * @param array $expectedResult
+     * @dataProvider getCasesForComponents
+     */
+    public function testComponents($instance, array $expectedResult): void
+    {
+        $this->assertEquals($expectedResult, $instance->components());
+    }
+
+    public function getCasesForComponents(): array
+    {
+        return [
+            '' => [ValueTypesType::of('value'), ['value' => 'value']],
+        ];
+    }
+
+    /**
+     * @param        $instance
+     * @param string $expectedResult
+     *
+     * @dataProvider getCasesForToString
+     */
+    public function testToString($instance, string $expectedResult): void
+    {
+        $this->assertEquals($expectedResult, (string)$instance);
+    }
+
+    public function getCasesForToString(): array
+    {
+        return [
+            'constructor' => [ValueTypesType::of('value'), "ValueTypesType(value='value')"],
+            'no constructor' => [ValueTypesWithoutConstructorType::of('value'), "ValueTypesWithoutConstructorType('value')"]
+        ];
+    }
 }
 
 class ValueTypesType
@@ -234,6 +270,16 @@ class ValueTypesType
     public function getValue()
     {
         return $this->value;
+    }
+}
+
+class ValueTypesWithoutConstructorType
+{
+    use ValueObjectTrait;
+
+    public static function of($value): self
+    {
+        return self::getInstance($value);
     }
 }
 

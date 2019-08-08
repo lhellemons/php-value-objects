@@ -3,6 +3,7 @@
 namespace SolidPhp\ValueObjects\Value;
 
 use SolidPhp\ValueObjects\Type\ClassType;
+use SolidPhp\ValueObjects\Type\Type;
 use SolidPhp\ValueObjects\Value\Ref\Ref;
 
 /**
@@ -22,21 +23,47 @@ use SolidPhp\ValueObjects\Value\Ref\Ref;
 trait ValueObjectTrait
 {
     /** @var Ref[] */
-    static private $instances = [];
+    static private $_instances = [];
+
+    static protected $_componentNames;
+
+    protected $_components = [];
+
+    protected $_stringValue;
 
     final protected static function getInstance(...$values): self
     {
+        if (null === static::$_componentNames) {
+            static::$_componentNames = getConstructorArgumentNames(static::class);
+        }
+
         $key = calculateKey(static::class, ...$values);
 
-        $ref = self::$instances[$key] = self::$instances[$key] ?? Ref::create();
+        $ref = self::$_instances[$key] = self::$_instances[$key] ?? Ref::create();
         if ($ref->has()) {
             return $ref->get();
         }
 
         $instance = new static(...$values);
+        $instance->_components = createComponentArray(static::$_componentNames, $values);
+
         $ref->set($instance);
 
         return $instance;
+    }
+
+    final public function components(): array
+    {
+        return $this->_components;
+    }
+
+    public function __toString(): string
+    {
+        if (null === $this->_stringValue) {
+            $this->_stringValue = sprintf('%s(%s)', getClassShortName(static::class), componentsToString($this->_components));
+        }
+
+        return $this->_stringValue;
     }
 
     public function __get($name)
@@ -74,6 +101,12 @@ trait ValueObjectTrait
     }
 }
 
+/**
+ * @param mixed ...$values
+ *
+ * @return string
+ * @internal
+ */
 function calculateKey(...$values): string
 {
     if (\count($values) === 0) {
@@ -103,5 +136,114 @@ function calculateKey(...$values): string
         return 'resource:' . $value;
     }
 
-    return sprintf('scalar<%s>:%s', \gettype($value), $value);
+    return sprintf('scalar<%s>:%s', \gettype($value), md5(var_export($value, true)));
+}
+
+/**
+ * @param string $class
+ *
+ * @return array
+ * @throws \ReflectionException
+ * @internal
+ */
+function getConstructorArgumentNames(string $class)
+{
+    $reflectionClass = new \ReflectionClass($class);
+    $constructor = $reflectionClass->getConstructor();
+
+    return array_map(
+        static function (\ReflectionParameter $parameter) {
+            return $parameter->getName();
+        },
+        $constructor ? $constructor->getParameters() : []
+    );
+}
+
+/**
+ * @param array $names
+ * @param array $values
+ *
+ * @return array|false
+ * @internal
+ */
+function createComponentArray(array $names, array $values)
+{
+    return array_combine(
+        array_slice(
+            $names + array_keys(array_fill(0, count($values), '')),
+            0,
+            count($values),
+            false
+        ),
+        $values
+    );
+}
+
+/**
+ * @param array $components
+ *
+ * @return string
+ * @internal
+ */
+function componentsToString(array $components)
+{
+    return implode(
+        ',',
+        array_map(
+            static function ($key, $value) {
+                $stringValue = componentValueToString($value);
+
+                return is_numeric($key) ? $stringValue : sprintf('%s=%s', $key, $stringValue);
+            },
+            array_keys($components),
+            array_values($components)
+        )
+    );
+}
+
+/**
+ * @param $value
+ *
+ * @return mixed|string
+ * @internal
+ */
+function componentValueToString($value)
+{
+    if (is_string($value)) {
+        return var_export(
+            strlen($value) > 100
+                ? substr($value, 0, 67) . '...' . substr($value, -30)
+                : $value,
+            true
+        );
+    }
+
+    if (is_scalar($value) || is_resource($value)) {
+        return (string)$value;
+    }
+
+    if (is_array($value)) {
+        return sprintf('[(%d)]', count($value));
+    }
+
+    if (is_object($value)) {
+        if (method_exists($value, '__toString')) {
+            return componentValueToString((string)$value);
+        }
+
+        return sprintf('{%s}', getClassShortName(\get_class($value)));
+    }
+
+    return '?';
+}
+
+/**
+ * @param string $class
+ *
+ * @return string
+ * @internal
+ */
+function getClassShortName(string $class): string
+{
+    return substr($class, strrpos($class, '\\') + 1);
 }
