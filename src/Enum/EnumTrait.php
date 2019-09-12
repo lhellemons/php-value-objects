@@ -2,8 +2,16 @@
 
 namespace SolidPhp\ValueObjects\Enum;
 
+use DomainException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+use ReflectionType;
+use function in_array;
+
 /**
  * Trait EnumTrait
+ *
  * @package SolidPhp\ValueObjects\Enum
  *
  * This Trait gives the using class the ability to function as an Enum.
@@ -70,6 +78,7 @@ namespace SolidPhp\ValueObjects\Enum;
  */
 trait EnumTrait /* implements EnumInterface */
 {
+    /** @var array<class-string, array<string, static>> */
     private static $instancesById;
 
     /** @var int[] */
@@ -86,6 +95,12 @@ trait EnumTrait /* implements EnumInterface */
     {
     }
 
+    /**
+     * @param string $id
+     * @param mixed[]  ...$constructorArguments
+     *
+     * @return static
+     */
     final protected static function define(string $id, ...$constructorArguments)
     {
         if (!isset(self::$instancesById[static::class])) {
@@ -129,14 +144,14 @@ trait EnumTrait /* implements EnumInterface */
         }
 
         if ($throwIfNotFound) {
-            throw new \DomainException(sprintf('Enum class %s has no instance "%s"', static::class, $id));
+            throw new DomainException(sprintf('Enum class %s has no instance "%s"', static::class, $id));
         }
 
         return null;
     }
 
     /**
-     * @return $this[]
+     * @return static[]
      */
     final public static function instances(): array
     {
@@ -149,7 +164,7 @@ trait EnumTrait /* implements EnumInterface */
     {
         static::_ensureAllInstancesInitialized();
 
-        return array_search($this, self::$instancesById[static::class], true);
+        return array_search($this, self::$instancesById[static::class], true) ?: '';
     }
 
     private static function _ensureAllInstancesInitialized(): void
@@ -164,12 +179,16 @@ trait EnumTrait /* implements EnumInterface */
     }
 }
 
+/**
+ * @param string $enumClass
+ * @psalm-param class-string $enumClass
+ */
 function call_all_public_nullary_factory_methods(string $enumClass): void
 {
     try {
-        $reflectionClass = new \ReflectionClass($enumClass);
+        $reflectionClass = new ReflectionClass($enumClass);
 
-        /** @var \ReflectionMethod[] $factoryMethods */
+        /** @var ReflectionMethod[] $factoryMethods */
         $factoryMethods = array_filter(
             $reflectionClass->getMethods(),
             'SolidPhp\ValueObjects\Enum\is_public_nullary_factory_method'
@@ -177,16 +196,22 @@ function call_all_public_nullary_factory_methods(string $enumClass): void
         foreach ($factoryMethods as $method) {
             $method->invoke(null);
         }
-    } catch (\ReflectionException $e) {
-        throw new \DomainException(sprintf('Unable to initialize instances of Enum class %s', $enumClass), 0, $e);
+    } catch (ReflectionException $e) {
+        throw new DomainException(sprintf('Unable to initialize instances of Enum class %s', $enumClass), 0, $e);
     }
 }
 
-function is_public_nullary_factory_method(\ReflectionMethod $method): bool
+function is_public_nullary_factory_method(ReflectionMethod $method): bool
 {
+    $returnType = $method->getReturnType();
+
     return $method->isPublic()
         && $method->isStatic()
         && $method->getNumberOfParameters() === 0
-        && ($returnType = $method->getReturnType())
-        && \in_array($returnType->getName(), ['self', $method->getDeclaringClass()->getName()], true);
+        && ($returnType instanceof ReflectionType)
+        && in_array(
+            $returnType->getName(),
+            ['self', $method->getDeclaringClass()->getName()],
+            true
+        );
 }

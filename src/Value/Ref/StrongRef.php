@@ -11,19 +11,14 @@ class StrongRef extends Ref
     /** @var object|null */
     private $object;
 
-    /**
-     * @return object|null
-     */
     public function get()
     {
         return $this->object;
     }
 
-    /**
-     * @param object|null $object
-     */
     public function set($object): void
     {
+        /** @psalm-suppress MixedAssignment */
         $this->object = $object;
     }
 

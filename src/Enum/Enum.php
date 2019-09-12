@@ -14,6 +14,9 @@ abstract class Enum implements EnumInterface
      * Default constructor. Stores the id in the instance for easy lookup, ignores all other
      * arguments.
      * Override the constructor in your subclass to change this behavior.
+     *
+     * @param string $id
+     * @param array  $arguments
      */
     protected function __construct(string $id, ...$arguments)
     {

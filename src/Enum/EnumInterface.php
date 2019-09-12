@@ -23,14 +23,14 @@ interface EnumInterface
      * @param string $id The id of the instance to retrieve
      * @param bool $throwIfNotFound If true, and there is no instance for the given $id, a DomainException will be
      * thrown. If false (default), null will be returned
-     * @return $this|null
+     * @return static|null
      * @throws \DomainException if $throwIfNotFound is true and there is no instance for the given $id
      */
     public static function instance(string $id, bool $throwIfNotFound = false);
 
     /**
      * Returns an array containing all instances of this Enum
-     * @return $this[]
+     * @return static[]
      */
     public static function instances(): array;
 

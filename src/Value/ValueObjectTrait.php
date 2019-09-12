@@ -3,7 +3,7 @@
 namespace SolidPhp\ValueObjects\Value;
 
 use SolidPhp\ValueObjects\Type\ClassType;
-use SolidPhp\ValueObjects\Value\Ref\Ref;
+use SolidPhp\ValueObjects\Value\Ref\ValueObjectRepository;
 
 /**
  * Trait ValueObjectTrait
@@ -18,27 +18,27 @@ use SolidPhp\ValueObjects\Value\Ref\Ref;
  *   the correct instance.
  *   <b>Important</b>: The call to getInstance must provide the arguments defined in the
  *   constructor, in the same order. Treat it as if you were calling the constructor directly.
+ *
+ * @template T
  */
 trait ValueObjectTrait
 {
-    /** @var Ref[] */
-    static private $instances = [];
-
+    /**
+     * @param mixed ...$values
+     * @psalm-param T ...$values
+     *
+     * @psalm-suppress MixedInferredReturnType
+     * @return static&object
+     * @psalm-return static<T>
+     */
     final protected static function getInstance(...$values): self
     {
-        $key = calculateKey(static::class, ...$values);
-
-        $ref = self::$instances[$key] = self::$instances[$key] ?? Ref::create();
-        if ($ref->has()) {
-            return $ref->get();
-        }
-
-        $instance = new static(...$values);
-        $ref->set($instance);
-
-        return $instance;
+        return ValueObjectRepository::getInstanceOfClass(static::class, ...$values);
     }
 
+    /**
+     * @param string $name
+     */
     public function __get($name)
     {
         throw new ValueObjectException(
@@ -46,6 +46,9 @@ trait ValueObjectTrait
         );
     }
 
+    /**
+     * @param string $name
+     */
     public function __isset($name)
     {
         throw new ValueObjectException(
@@ -53,6 +56,11 @@ trait ValueObjectTrait
         );
     }
 
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     */
     final public function __set($name, $value)
     {
         throw ValueObjectException::cannotMutate(ClassType::of(static::class));
@@ -63,6 +71,9 @@ trait ValueObjectTrait
         throw ValueObjectException::cannotUnserialize(ClassType::of(static::class));
     }
 
+    /**
+     * @param array $an_array
+     */
     final public static function __set_state($an_array)
     {
         throw ValueObjectException::cannotUnserialize(ClassType::of(static::class));
@@ -72,36 +83,4 @@ trait ValueObjectTrait
     {
         throw ValueObjectException::cannotClone(ClassType::of(static::class));
     }
-}
-
-function calculateKey(...$values): string
-{
-    if (\count($values) === 0) {
-        return '()';
-    }
-
-    if (\count($values) > 1) {
-        return implode('|', array_map('SolidPhp\ValueObjects\Value\calculateKey', $values));
-    }
-
-    [$value] = $values;
-
-    if ($value instanceof \stdClass || \is_array($value)) {
-        return 'array:' . http_build_query(array_map('SolidPhp\ValueObjects\Value\calculateKey', (array)$value));
-    }
-
-    if (\is_object($value)) {
-        return 'object:' . spl_object_hash($value);
-    }
-
-    if (null === $value) {
-        return 'null';
-    }
-
-    if (\is_resource($value)) {
-        // note: this works because PHP stringifies resources as 'resource id #x' and never reuses x during a script run
-        return 'resource:' . $value;
-    }
-
-    return sprintf('scalar<%s>:%s', \gettype($value), $value);
 }

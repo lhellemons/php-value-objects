@@ -2,13 +2,17 @@
 
 namespace SolidPhp\ValueObjects\Type;
 
+use InvalidArgumentException;
 use SolidPhp\ValueObjects\Value\ValueObjectTrait;
 
 abstract class Type
 {
     use ValueObjectTrait;
 
-    /** @var string */
+    /**
+     * @var string
+     * @psalm-var class-string
+     */
     protected $name;
 
     /** @var string|null */
@@ -17,7 +21,12 @@ abstract class Type
     /** @var Kind */
     protected $kind;
 
-    private function __construct(string $name, Kind $kind)
+    /**
+     * @param string $name
+     * @psalm-param class-string $name
+     * @param Kind   $kind
+     */
+    protected function __construct(string $name, Kind $kind)
     {
         $this->name = $name;
         $this->kind = $kind;
@@ -43,7 +52,7 @@ abstract class Type
             return TraitType::fromFullyQualifiedTraitName($source);
         }
 
-        throw new \InvalidArgumentException(sprintf('Unsupported type: %s', $source));
+        throw new InvalidArgumentException(sprintf('Unsupported type: %s', $source));
     }
 
     /**
@@ -56,6 +65,10 @@ abstract class Type
         return ClassType::fromInstance($instance);
     }
 
+    /**
+     * @return string
+     * @psalm-return class-string
+     */
     public function getFullyQualifiedName(): string
     {
         return $this->name;
@@ -63,7 +76,7 @@ abstract class Type
 
     public function getShortName(): string
     {
-        return $this->shortName = $this->shortName ?: substr($this->name, strrpos($this->name, '\\') + 1);
+        return $this->shortName = $this->shortName ?: substr($this->name, (int)strrpos($this->name, '\\') + 1);
     }
 
     public function getKind(): Kind

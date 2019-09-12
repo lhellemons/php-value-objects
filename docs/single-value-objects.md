@@ -3,10 +3,10 @@ Single value objects
 
 By far the most common use case for value objects involve an object
 represented by a single value, which is also its serialized representation.
-For these cases we offer the `SingleValueObjectInterface` and the
+For these cases this library offers the `SingleValueObjectInterface` and the
 `SingleValueObjectTrait`.
 
-A `SingleValueObjectInterface` defines one factory method `of` that
+A `SingleValueObjectInterface` defines one factory method, `of`, that
 constructs an instance from its serialized representation, one instance
 method `getValue` that retrieves the serialized representation, and
 also requires that you implement `__toString` to get the string
@@ -34,6 +34,9 @@ class EmailAddress extends SingleValueObject
 {
 }
 ```
+
+Of course, SingleValueObjects are just value objects, so it's fine
+to add more factory methods.
 
 Validation
 ----------
