@@ -15,17 +15,11 @@ class PeclWeakRef extends Ref
     /** @var PhpWeakRef|null */
     private $weakRef;
 
-    /**
-     * @return object|null
-     */
     public function get()
     {
         return $this->weakRef ? $this->weakRef->get() : null;
     }
 
-    /**
-     * @param object|null $object
-     */
     public function set($object): void
     {
         $this->weakRef = new PhpWeakRef($object);

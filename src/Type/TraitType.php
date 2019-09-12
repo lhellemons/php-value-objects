@@ -12,11 +12,19 @@ use InvalidArgumentException;
 
 final class TraitType extends Type
 {
+    /**
+     * @param string $classString
+     * @psalm-param class-string|string $classString
+     *
+     * @psalm-suppress MoreSpecificReturnType
+     * @return self
+     */
     public static function fromFullyQualifiedTraitName(string $classString): self
     {
         if (!trait_exists($classString)) {
             throw new InvalidArgumentException(sprintf('Type "%s" does not exist or is not a trait', $classString));
         }
+        /** @psalm-suppress LessSpecificReturnStatement */
         return static::getInstance($classString, Kind::TRAIT());
     }
 }

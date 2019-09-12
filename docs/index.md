@@ -7,8 +7,8 @@ This library contains utility classes, traits and interfaces for working
  with value objects in PHP. By using these, you can easily define your
  own value objects.
 
-Contents
---------
+Topics
+------
 - [Usage](usage.md)
 - [Value objects](value-objects.md)
   - [Single value objects](single-value-objects.md)

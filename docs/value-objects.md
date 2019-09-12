@@ -107,22 +107,25 @@ from the following usage rules:
 ```php
 $entity = new Entity();
 $entity->property = 1;
-$valueObjectB = ValueClass::fromEntity($entity);
+$valueObjectA = ValueClass::fromEntity($entity);
 $entity->property = 2;
 $valueObjectB = ValueClass::fromEntity($entity);
-$valueObjectA === $valueObjectB; // true
+$valueObjectA === $valueObjectB; // true, and _probably_ what you want
 ```
 
-WeakRef
--------
+Weak References
+---------------
 
-Value objects support the PHP [WeakRef extension](http://php.net/manual/en/book.weakref.php). 
-If your PHP runtime has the WeakRef extension installed, value object
- instances will be kept as weak references, and will be 
- garbage-collected
- when they are no longer referenced in code. This means it becomes
- possible to instantiate enormous numbers of value objects for
- quick tasks without consuming excessive memory.
+Weak references are an important part of keeping memory usage down
+in PHP scripts that run for a long time or instantiate massive
+numbers of objects. The garbage collector can figure out where an object
+is referred to in the script and removes it from memory when no references
+remain. Since value object classes keep track of their instances (so that
+they can use the same instance for the same value each time), using weak references is a considerable advantage
 
-If the WeakRef extension is not installed, value object instances will
+PHP supports weak references in several ways.
+- In PHP 7.4+, there is a [native WeakReference implementation](https://www.php.net/manual/en/class.weakreference.php);
+- In PHP 7.2 and below, there is a [WeakRef PECL extension](http://php.net/manual/en/book.weakref.php) that has to be installed and enabled separately.
+
+The Value Object SDK supports both implementations. If your PHP runtime has either enabled, value object instances will be kept as wea references, and will be garbage-collected when they are no longer referenced in code. If not, value object instances will
 be kept in memory until the script finishes.
