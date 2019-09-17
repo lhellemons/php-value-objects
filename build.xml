@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="php-value-objects" default="test">
+    <target name="test" depends="phpunit,psalm" />
+    <target name="psalm">
+        <exec executable="vendor/bin/psalm" checkreturn="true" />
+    </target>
+    <target name="phpunit">
+        <exec executable="vendor/bin/phpunit" checkreturn="true" />
+    </target>
+</project>

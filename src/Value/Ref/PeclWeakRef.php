@@ -2,8 +2,6 @@
 
 namespace SolidPhp\ValueObjects\Value\Ref;
 
-use \WeakRef as PhpWeakRef;
-
 /**
  * Class WeakRef
  * A Ref implementation that uses the PECL WeakRef extension (available in PHP < 7.3)
@@ -12,7 +10,7 @@ use \WeakRef as PhpWeakRef;
  */
 class PeclWeakRef extends Ref
 {
-    /** @var PhpWeakRef|null */
+    /** @var \WeakRef|null */
     private $weakRef;
 
     public function get()
@@ -22,7 +20,7 @@ class PeclWeakRef extends Ref
 
     public function set($object): void
     {
-        $this->weakRef = new PhpWeakRef($object);
+        $this->weakRef = new \WeakRef($object);
     }
 
     public function has(): bool

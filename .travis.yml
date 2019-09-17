@@ -15,10 +15,12 @@ matrix:
         - php: "7.4snapshot"
           env: WITH_PECL_WEAKREF=true
 
-before-install:
+before_install:
     - composer self-update
 # Install composer dependencies,
 # Create database, schema and fixtures
 install:
     - composer install
     - if [ "$WITH_PECL_WEAKREF" = "true" ]; then pecl install weakref-beta; fi
+
+script: vendor/bin/phing -verbose test
