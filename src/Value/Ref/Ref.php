@@ -2,7 +2,7 @@
 
 namespace SolidPhp\ValueObjects\Value\Ref;
 
-define('__SOLIDPHP_VALUEOBJECTS_WEAKREF_AVAILABLE', class_exists('\WeakRef'));
+define('__SOLIDPHP_VALUEOBJECTS_WEAKREF_AVAILABLE', class_exists('\WeakRef',false));
 
 if (__SOLIDPHP_VALUEOBJECTS_WEAKREF_AVAILABLE) {
     function createRef(): Ref {
